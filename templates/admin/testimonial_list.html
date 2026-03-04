@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Отзывы{% endblock %}
+
+{% block page_title %}Отзывы{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+    {% include 'admin/_section_nav_cards.html' with active_section='testimonials' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="card-title">Список отзывов</h3>
+            </div>
+            <div class="col-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Поиск..." style="width: 220px;">
+                    <a href="{% url 'admin_panel:testimonial_create' %}" class="btn btn-sm btn-primary ms-2">
+                        <i class="ti ti-plus"></i> Создать
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="testimonials-table" class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Компания</th>
+                    <th>Оценка</th>
+                    <th>Статус</th>
+                    <th class="w-1">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in testimonials %}
+                <tr>
+                    <td>{{ t.person_name }}</td>
+                    <td>{{ t.company_name }}</td>
+                    <td>{{ t.rating|default:"—" }}</td>
+                    <td>
+                        {% if t.status == 'draft' %}
+                        <span class="badge bg-secondary text-white">Черновик</span>
+                        {% elif t.status == 'on_moderation' %}
+                        <span class="badge bg-warning text-dark">На модерации</span>
+                        {% elif t.status == 'published' %}
+                        <span class="badge bg-success text-white">Опубликовано</span>
+                        {% else %}
+                        <span class="badge bg-secondary text-white">Архив</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-list flex-nowrap">
+                            <a href="{% url 'admin_panel:testimonial_edit' t.pk %}" class="btn btn-sm btn-primary">
+                                <i class="ti ti-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:testimonial_delete' t.pk %}" class="btn btn-sm btn-danger">
+                                <i class="ti ti-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Отзывы не найдены</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        var table = $('#testimonials-table').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/ru.json'
+            },
+            pageLength: 25,
+            order: [[0, 'asc']],
+            columnDefs: [
+                { orderable: false, targets: 4 }
+            ]
+        });
+        $('#search-input').on('keyup', function() {
+            table.search($(this).val()).draw();
+        });
+    });
+</script>
+{% endblock %}
+

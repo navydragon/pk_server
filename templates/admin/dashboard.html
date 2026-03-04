@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block page_title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="row row-cards">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-primary text-white avatar">
+                            <i class="ti ti-category"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Направления
+                        </div>
+                        <div class="text-muted">
+                            {{ directions_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-success text-white avatar">
+                            <i class="ti ti-school"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Формы обучения
+                        </div>
+                        <div class="text-muted">
+                            {{ learning_formats_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-info text-white avatar">
+                            <i class="ti ti-book"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Программы
+                        </div>
+                        <div class="text-muted">
+                            {{ programs_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-warning text-white avatar">
+                            <i class="ti ti-calendar"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Потоки/Наборы
+                        </div>
+                        <div class="text-muted">
+                            {{ course_batches_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-cyan text-white avatar">
+                            <i class="ti ti-file-text"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Заявки
+                        </div>
+                        <div class="text-muted">
+                            {{ applications_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-teal text-white avatar">
+                            <i class="ti ti-phone-call"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Обратные звонки
+                        </div>
+                        <div class="text-muted">
+                            {{ callback_requests_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-indigo text-white avatar">
+                            <i class="ti ti-news"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Публикации
+                        </div>
+                        <div class="text-muted">
+                            {{ publications_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-orange text-white avatar">
+                            <i class="ti ti-briefcase"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Кейсы
+                        </div>
+                        <div class="text-muted">
+                            {{ cases_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-pink text-white avatar">
+                            <i class="ti ti-quote"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Отзывы
+                        </div>
+                        <div class="text-muted">
+                            {{ testimonials_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Быстрые действия</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:direction_list' %}" class="btn btn-primary w-100 mb-2">
+                            <i class="ti ti-category"></i> Управление направлениями
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:learningformat_list' %}" class="btn btn-success w-100 mb-2">
+                            <i class="ti ti-school"></i> Управление формами
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:program_list' %}" class="btn btn-info w-100 mb-2">
+                            <i class="ti ti-book"></i> Управление программами
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:coursebatch_list' %}" class="btn btn-warning w-100 mb-2">
+                            <i class="ti ti-calendar"></i> Управление потоками
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:application_list' %}" class="btn btn-cyan w-100 mb-2">
+                            <i class="ti ti-file-text"></i> Управление заявками
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:callbackrequest_list' %}" class="btn btn-teal w-100 mb-2">
+                            <i class="ti ti-phone-call"></i> Обратные звонки
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:publication_list' %}" class="btn btn-indigo w-100 mb-2">
+                            <i class="ti ti-news"></i> Публикации
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:case_list' %}" class="btn btn-orange w-100 mb-2">
+                            <i class="ti ti-briefcase"></i> Кейсы
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:testimonial_list' %}" class="btn btn-pink w-100 mb-2">
+                            <i class="ti ti-quote"></i> Отзывы
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

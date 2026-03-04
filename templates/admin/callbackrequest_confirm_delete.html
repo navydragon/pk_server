@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление запроса обратного звонка{% endblock %}
+
+{% block page_title %}Удаление запроса обратного звонка{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <p>Вы уверены, что хотите удалить запрос <strong>{{ object.name }} — {{ object.phone }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-footer">
+                <button type="submit" class="btn btn-danger">Да, удалить</button>
+                <a href="{% url 'admin_panel:callbackrequest_list' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

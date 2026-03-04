@@ -1,0 +1,166 @@
+# Правила разработки проекта pk_server
+
+## Окружение и виртуальное окружение
+
+### КРИТИЧЕСКИ ВАЖНО: Активация venv
+- **ВСЕГДА** активируй виртуальное окружение перед выполнением любых команд Python/Django
+- Используй команду: `.\venv\Scripts\Activate.ps1` (PowerShell) или `venv\Scripts\activate` (CMD)
+- При выполнении команд через терминал ВСЕГДА используй полный путь к Python из venv: `.\venv\Scripts\python.exe`
+- НИКОГДА не используй системный Python напрямую - это приведет к ошибкам импорта модулей
+- Проверяй, что используется правильный Python: `python -c "import sys; print(sys.executable)"` должен показывать путь к venv
+
+### Структура проекта
+- Проект использует Django 6.0.1
+- Виртуальное окружение находится в `venv/`
+- Настройки проекта в `config/settings.py`
+- Главный URL-конфиг: `config/urls.py`
+- Приложения: `core`, `admin_panel`, `api`
+
+## Django команды
+
+### Выполнение команд Django
+- ВСЕГДА используй: `.\venv\Scripts\python.exe manage.py <команда>`
+- Или активируй venv: `.\venv\Scripts\Activate.ps1` затем `python manage.py <команда>`
+- Примеры:
+  - `.\venv\Scripts\python.exe manage.py check` - проверка конфигурации
+  - `.\venv\Scripts\python.exe manage.py test` - запуск тестов
+  - `.\venv\Scripts\python.exe manage.py migrate` - применение миграций
+  - `.\venv\Scripts\python.exe manage.py runserver` - запуск сервера
+
+## API разработка
+
+### Приложение api
+- Приложение `api` содержит REST API эндпоинты
+- Используется Django REST Framework (DRF) и drf-spectacular для Swagger документации
+- Все эндпоинты находятся в `api/views.py`
+- Сериализаторы в `api/serializers.py`
+- URL-маршруты в `api/urls.py`
+
+### Стандарты API
+- Используй `@extend_schema` декоратор для документации эндпоинтов в Swagger
+- Всегда указывай `help_text` в полях моделей (не в сериализаторах) для автоматической документации
+- Используй `renderer_classes = [JSONRenderer]` для ограничения content type только JSON
+- Для открытых эндпоинтов явно указывай: `authentication_classes: list = []` и `permission_classes: list = []`
+- Используй `select_related()` и `prefetch_related()` для оптимизации запросов к БД
+
+### Swagger документация
+- Swagger UI доступен по адресу: `http://127.0.0.1:8000/api/`
+- Схема OpenAPI: `http://127.0.0.1:8000/api/schema/`
+- ReDoc: `http://127.0.0.1:8000/api/redoc/`
+
+## Модели и сериализаторы
+
+### Модели (core/models.py)
+- ВСЕГДА добавляй `help_text` в поля моделей для документации API
+- Используй `verbose_name` для всех полей
+- Для ForeignKey и ManyToMany используй `related_name`
+- Используй `choices` для полей со статусами
+
+### Сериализаторы (api/serializers.py)
+- Используй `ModelSerializer` для моделей
+- Для вычисляемых полей (не из модели) добавляй `help_text` в сериализаторе
+- Используй `read_only=True` для полей, которые не должны изменяться через API
+- Используй `source` для доступа к связанным полям
+
+## Тестирование
+
+### Запуск тестов
+- ВСЕГДА используй: `.\venv\Scripts\python.exe manage.py test`
+- Для конкретного приложения: `.\venv\Scripts\python.exe manage.py test api`
+- Для конкретного теста: `.\venv\Scripts\python.exe manage.py test api.tests.ActiveProgramsApiTests`
+- Используй `--verbosity=2` для подробного вывода
+
+### Написание тестов
+- Все тесты наследуются от `APITestCase` для API тестов
+- Используй `setUp()` для создания тестовых данных
+- Проверяй статус коды, структуру ответа и данные
+- Используй `reverse()` для получения URL по имени
+
+## База данных
+
+### Миграции
+- Создание миграций: `.\venv\Scripts\python.exe manage.py makemigrations`
+- Применение миграций: `.\venv\Scripts\python.exe manage.py migrate`
+- Откат миграций: `.\venv\Scripts\python.exe manage.py migrate <app> <номер_миграции>`
+
+### Настройки БД
+- По умолчанию используется SQLite (`db.sqlite3`)
+- Настройки БД в `config/settings.py` читаются из переменных окружения через `python-decouple`
+- Файл `.env` должен быть создан на основе `.env.example`
+
+## Переменные окружения
+
+### Обязательные переменные
+- `SECRET_KEY` - секретный ключ Django
+- `DEBUG` - режим отладки (True/False)
+- `ALLOWED_HOSTS` - список разрешенных хостов (через запятую)
+- `LANGUAGE_CODE` - код языка (по умолчанию: ru-ru)
+- `TIME_ZONE` - часовой пояс (по умолчанию: Europe/Moscow)
+
+### Файл .env
+- НЕ коммить файл `.env` в git (должен быть в `.gitignore`)
+- Используй `.env.example` как шаблон
+- Все настройки читаются через `config()` из `python-decouple`
+
+## Статические файлы и медиа
+
+### Статические файлы
+- Статические файлы в `static/`
+- CSS файлы для кастомизации Swagger в `static/swagger-custom.css`
+- Настройка в `config/settings.py`: `STATIC_URL = 'static/'`
+
+## Код стиль и стандарты
+
+### Python код
+- Используй docstrings для всех классов и функций
+- Комментарии на русском языке для бизнес-логики
+- Имена переменных и функций на английском
+- Используй type hints где возможно
+- Следуй PEP 8
+
+### Django код
+- Используй классы для views (APIView, GenericAPIView)
+- Группируй связанные views в один файл
+- Используй `verbose_name` и `help_text` в моделях
+- Используй `related_name` для ForeignKey и ManyToMany
+
+## Безопасность
+
+### API эндпоинты
+- Для открытых эндпоинтов явно указывай отсутствие аутентификации
+- В продакшене используй дополнительную защиту (IP whitelist, reverse-proxy)
+- НЕ размещай секретные ключи в коде - используй переменные окружения
+
+## Отладка и проверка
+
+### Проверка конфигурации
+- Всегда проверяй конфигурацию перед коммитом: `.\venv\Scripts\python.exe manage.py check`
+- Проверяй линтер ошибки перед коммитом
+- Запускай тесты перед коммитом
+
+### Логирование
+- Используй стандартное логирование Django
+- Настройки логирования в `config/settings.py` (если нужно)
+
+## VS Code задачи
+
+### Доступные задачи
+- "Django: Run All Tests" - запуск всех тестов (использует Python из venv)
+- "Django: Run Server" - запуск сервера разработки
+- "Django: Make Migrations" - создание миграций
+- "Django: Migrate" - применение миграций
+- "Django: Check" - проверка конфигурации
+
+### Использование задач
+- Все задачи используют Python из venv автоматически
+- Запуск через Command Palette: `Ctrl+Shift+P` → "Tasks: Run Task"
+
+## Важные напоминания
+
+1. **ВСЕГДА активируй venv перед выполнением команд Python/Django**
+2. **Используй полный путь к Python из venv: `.\venv\Scripts\python.exe`**
+3. **Проверяй конфигурацию перед коммитом: `.\venv\Scripts\python.exe manage.py check`**
+4. **Запускай тесты перед коммитом: `.\venv\Scripts\python.exe manage.py test`**
+5. **Добавляй `help_text` в модели, а не в сериализаторы**
+6. **Используй оптимизацию запросов (`select_related`, `prefetch_related`)**
+7. **Документируй API эндпоинты через `@extend_schema`**

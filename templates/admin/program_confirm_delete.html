@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление программы{% endblock %}
+
+{% block page_title %}Удаление программы{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <p>Вы уверены, что хотите удалить программу <strong>{{ object.name }}</strong>?</p>
+        <p class="text-muted">Это действие также удалит все связанные потоки/наборы.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-footer">
+                <button type="submit" class="btn btn-danger">Да, удалить</button>
+                <a href="{% url 'admin_panel:program_list' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

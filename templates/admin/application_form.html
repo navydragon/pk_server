@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Редактирование{% else %}Создание{% endif %} заявки{% endblock %}
+
+{% block page_title %}{% if object %}Редактирование заявки{% else %}Создание заявки{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">ФИО</label>
+                        {{ form.full_name }}
+                        {% if form.full_name.errors %}
+                        <div class="text-danger">{{ form.full_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="text-danger">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Телефон</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                        <div class="text-danger">{{ form.phone.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Программа</label>
+                        {{ form.program }}
+                        {% if form.program.errors %}
+                        <div class="text-danger">{{ form.program.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Поток</label>
+                        {{ form.batch }}
+                        {% if form.batch.errors %}
+                        <div class="text-danger">{{ form.batch.errors }}</div>
+                        {% endif %}
+                        <small class="form-hint">Сначала выберите программу. При создании заявки выберите программу и отправьте форму, чтобы обновить список потоков.</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Статус</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <div class="text-danger">{{ form.status.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Комментарий слушателя</label>
+                {{ form.comment }}
+                {% if form.comment.errors %}
+                <div class="text-danger">{{ form.comment.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Комментарий администратора</label>
+                {{ form.admin_comment }}
+                {% if form.admin_comment.errors %}
+                <div class="text-danger">{{ form.admin_comment.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{% url 'admin_panel:application_list' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

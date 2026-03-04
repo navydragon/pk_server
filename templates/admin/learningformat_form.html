@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Редактирование{% else %}Создание{% endif %} формата обучения{% endblock %}
+
+{% block page_title %}{% if object %}Редактирование формата обучения{% else %}Создание формата обучения{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label required">Название</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Краткое описание</label>
+                {{ form.short_description }}
+                {% if form.short_description.errors %}
+                <div class="text-danger">{{ form.short_description.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Подробное описание</label>
+                {{ form.full_description }}
+                {% if form.full_description.errors %}
+                <div class="text-danger">{{ form.full_description.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Порядок сортировки</label>
+                {{ form.sort_order }}
+                {% if form.sort_order.errors %}
+                <div class="text-danger">{{ form.sort_order.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label required">Статус</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                <div class="text-danger">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{% url 'admin_panel:learningformat_list' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Редактирование{% else %}Создание{% endif %} программы{% endblock %}
+
+{% block page_title %}{% if object %}Редактирование программы{% else %}Создание программы{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Название</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Направление</label>
+                        {{ form.direction }}
+                        {% if form.direction.errors %}
+                        <div class="text-danger">{{ form.direction.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Вид программы</label>
+                        {{ form.program_type }}
+                        {% if form.program_type.errors %}
+                        <div class="text-danger">{{ form.program_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Код направления подготовки</label>
+                        {{ form.training_direction_code }}
+                        {% if form.training_direction_code.errors %}
+                        <div class="text-danger">{{ form.training_direction_code.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label required">Лид</label>
+                {{ form.lead }}
+                {% if form.lead.errors %}
+                <div class="text-danger">{{ form.lead.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label required">Описание "О программе"</label>
+                {{ form.about_description }}
+                {% if form.about_description.errors %}
+                <div class="text-danger">{{ form.about_description.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label required">Программа обучения (учебный план)</label>
+                {{ form.curriculum }}
+                {% if form.curriculum.errors %}
+                <div class="text-danger">{{ form.curriculum.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label required">Целевая аудитория</label>
+                {{ form.target_audience }}
+                {% if form.target_audience.errors %}
+                <div class="text-danger">{{ form.target_audience.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Порядок зачисления</label>
+                {{ form.enrollment_process }}
+                {% if form.enrollment_process.errors %}
+                <div class="text-danger">{{ form.enrollment_process.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Форма обучения</label>
+                {{ form.learning_format }}
+                {% if form.learning_format.errors %}
+                <div class="text-danger">{{ form.learning_format.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Комментарий к форме обучения</label>
+                {{ form.learning_format_comment }}
+                {% if form.learning_format_comment.errors %}
+                <div class="text-danger">{{ form.learning_format_comment.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label required">Объём программы в часах</label>
+                        {{ form.hours_volume }}
+                        {% if form.hours_volume.errors %}
+                        <div class="text-danger">{{ form.hours_volume.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label required">Календарная длительность</label>
+                        {{ form.duration }}
+                        {% if form.duration.errors %}
+                        <div class="text-danger">{{ form.duration.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label required">Стоимость</label>
+                        {{ form.cost }}
+                        {% if form.cost.errors %}
+                        <div class="text-danger">{{ form.cost.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Итог по программе</label>
+                {{ form.outcome }}
+                {% if form.outcome.errors %}
+                <div class="text-danger">{{ form.outcome.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Требования к слушателям</label>
+                {{ form.requirements }}
+                {% if form.requirements.errors %}
+                <div class="text-danger">{{ form.requirements.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Результаты обучения</label>
+                {{ form.learning_outcomes }}
+                {% if form.learning_outcomes.errors %}
+                <div class="text-danger">{{ form.learning_outcomes.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label required">Статус</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                <div class="text-danger">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{% url 'admin_panel:program_list' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

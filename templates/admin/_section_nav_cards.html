@@ -1,0 +1,121 @@
+{# Компактная навигация по разделам (в одну линию) #}
+{# Ожидает переменную active_section: directions|formats|programs|batches|applications|callback_requests|publications|cases|testimonials #}
+<div class="d-flex flex-wrap gap-2 justify-content-end">
+  <a href="{% url 'admin_panel:direction_list' %}"
+     class="card card-sm card-link {% if active_section == 'directions' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 170px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-primary text-white">
+          <i class="ti ti-category"></i>
+        </span>
+        <div class="fw-semibold">Направления</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:learningformat_list' %}"
+     class="card card-sm card-link {% if active_section == 'formats' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 190px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-info text-white">
+          <i class="ti ti-school"></i>
+        </span>
+        <div class="fw-semibold">Формы</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:program_list' %}"
+     class="card card-sm card-link {% if active_section == 'programs' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 170px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-success text-white">
+          <i class="ti ti-book"></i>
+        </span>
+        <div class="fw-semibold">Программы</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:coursebatch_list' %}"
+     class="card card-sm card-link {% if active_section == 'batches' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 190px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-warning text-white">
+          <i class="ti ti-calendar"></i>
+        </span>
+        <div class="fw-semibold">Потоки/Наборы</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:application_list' %}"
+     class="card card-sm card-link {% if active_section == 'applications' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 160px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-cyan text-white">
+          <i class="ti ti-file-text"></i>
+        </span>
+        <div class="fw-semibold">Заявки</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:callbackrequest_list' %}"
+     class="card card-sm card-link {% if active_section == 'callback_requests' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 180px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-teal text-white">
+          <i class="ti ti-phone-call"></i>
+        </span>
+        <div class="fw-semibold">Обратные звонки</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:publication_list' %}"
+     class="card card-sm card-link {% if active_section == 'publications' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 160px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-indigo text-white">
+          <i class="ti ti-news"></i>
+        </span>
+        <div class="fw-semibold">Публикации</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:case_list' %}"
+     class="card card-sm card-link {% if active_section == 'cases' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 150px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-orange text-white">
+          <i class="ti ti-briefcase"></i>
+        </span>
+        <div class="fw-semibold">Кейсы</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:testimonial_list' %}"
+     class="card card-sm card-link {% if active_section == 'testimonials' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 170px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-pink text-white">
+          <i class="ti ti-quote"></i>
+        </span>
+        <div class="fw-semibold">Отзывы</div>
+      </div>
+    </div>
+  </a>
+</div>
+

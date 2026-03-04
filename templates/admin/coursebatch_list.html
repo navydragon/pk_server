@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Потоки/Наборы{% endblock %}
+
+{% block page_title %}Потоки/Наборы{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+    {% include 'admin/_section_nav_cards.html' with active_section='batches' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="card-title">Список потоков/наборов</h3>
+            </div>
+            <div class="col-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Поиск..." style="width: 200px;">
+                    <select id="status-filter" class="form-select form-select-sm" style="width: auto;">
+                        <option value="">Все статусы</option>
+                        <option value="Набор открыт">Набор открыт</option>
+                        <option value="Набор закрыт">Набор закрыт</option>
+                        <option value="Идет обучение">Идет обучение</option>
+                        <option value="Завершен">Завершен</option>
+                        <option value="Отменен">Отменен</option>
+                    </select>
+                    <a href="{% url 'admin_panel:coursebatch_create' %}" class="btn btn-sm btn-primary ms-2">
+                        <i class="ti ti-plus"></i> Создать
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="batches-table" class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Программа</th>
+                    <th>Формат</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                    <th>Статус</th>
+                    <th>Мест</th>
+                    <th>Стоимость</th>
+                    <th class="w-1">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for batch in batches %}
+                <tr>
+                    <td>{{ batch.name|default:"—" }}</td>
+                    <td>{{ batch.program.name }}</td>
+                    <td>{{ batch.learning_format.name }}</td>
+                    <td>{{ batch.start_date|date:"d.m.Y" }}</td>
+                    <td>{{ batch.end_date|date:"d.m.Y"|default:"—" }}</td>
+                    <td>
+                        {% if batch.status == 'enrollment_open' %}
+                        <span class="badge bg-success text-white">Набор открыт</span>
+                        {% elif batch.status == 'enrollment_closed' %}
+                        <span class="badge bg-warning text-white">Набор закрыт</span>
+                        {% elif batch.status == 'in_progress' %}
+                        <span class="badge bg-info text-white">Идет обучение</span>
+                        {% elif batch.status == 'completed' %}
+                        <span class="badge bg-secondary text-white">Завершен</span>
+                        {% else %}
+                        <span class="badge bg-danger text-white">Отменен</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ batch.seats_count|default:"—" }}</td>
+                    <td>{{ batch.cost|default:"—" }}</td>
+                    <td>
+                        <div class="btn-list flex-nowrap">
+                            <a href="{% url 'admin_panel:coursebatch_edit' batch.pk %}" class="btn btn-sm btn-primary">
+                                <i class="ti ti-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:coursebatch_delete' batch.pk %}" class="btn btn-sm btn-danger">
+                                <i class="ti ti-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">Потоки/наборы не найдены</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        var table = $('#batches-table').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/ru.json'
+            },
+            pageLength: 25,
+            order: [[3, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: 8 }
+            ]
+        });
+        
+        // Поиск
+        $('#search-input').on('keyup', function() {
+            table.search($(this).val()).draw();
+        });
+        
+        // Фильтр по статусу
+        $('#status-filter').on('change', function() {
+            var status = $(this).val();
+            table.column(5).search(status).draw();
+        });
+    });
+</script>
+{% endblock %}

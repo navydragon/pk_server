@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Редактирование{% else %}Создание{% endif %} кейса{% endblock %}
+
+{% block page_title %}{% if object %}Редактирование кейса{% else %}Создание кейса{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h4 class="mb-3">Основное</h4>
+            <div class="mb-3">
+                <label class="form-label required">Заголовок</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="text-danger">{{ form.title.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Slug</label>
+                {{ form.slug }}
+                {% if form.slug.errors %}<div class="text-danger">{{ form.slug.errors }}</div>{% endif %}
+                <small class="form-hint">Оставьте пустым для автозаполнения в админке Django.</small>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Компания клиента</label>
+                        {{ form.client_company }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Отрасль</label>
+                        {{ form.client_industry }}
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mb-3 mt-4">Содержимое</h4>
+            <div class="mb-3">
+                <label class="form-label">Краткое описание</label>
+                {{ form.short_description }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Полный текст</label>
+                {{ form.content }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Услуги/курсы</label>
+                {{ form.services }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Краткий результат</label>
+                {{ form.results_short }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Подробные результаты</label>
+                {{ form.results_detailed }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Метрики</label>
+                {{ form.metrics }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Основное изображение</label>
+                {{ form.main_image }}
+                {% if object.main_image %}<p class="mt-1"><img src="{{ object.main_image.url }}" alt="" style="max-height: 120px;" class="img-thumbnail"></p>{% endif %}
+            </div>
+
+            <h4 class="mb-3 mt-4">Публикация и статус</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label required">Статус</label>
+                        {{ form.status }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Дата публикации</label>
+                        {{ form.published_at }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Порядок сортировки</label>
+                        {{ form.sort_order }}
+                        <div class="form-check mt-2">
+                            {{ form.is_featured }}
+                            <label class="form-check-label" for="id_is_featured">На главной</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mb-3 mt-4">Категории и теги</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Категории</label>
+                        {{ form.categories }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Теги</label>
+                        {{ form.tags }}
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mb-3 mt-4">SEO</h4>
+            <div class="mb-3">
+                <label class="form-label">SEO заголовок</label>
+                {{ form.meta_title }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">SEO описание</label>
+                {{ form.meta_description }}
+            </div>
+
+            <div class="form-footer mt-4">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{% url 'admin_panel:case_list' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Публикации{% endblock %}
+
+{% block page_title %}Публикации{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+    {% include 'admin/_section_nav_cards.html' with active_section='publications' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="card-title">Список публикаций</h3>
+            </div>
+            <div class="col-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Поиск..." style="width: 200px;">
+                    <select id="type-filter" class="form-select form-select-sm" style="width: auto;">
+                        <option value="">Все типы</option>
+                        <option value="Новость">Новость</option>
+                        <option value="Статья">Статья</option>
+                    </select>
+                    <select id="status-filter" class="form-select form-select-sm" style="width: auto;">
+                        <option value="">Все статусы</option>
+                        <option value="Черновик">Черновик</option>
+                        <option value="На модерации">На модерации</option>
+                        <option value="Опубликовано">Опубликовано</option>
+                        <option value="Архив">Архив</option>
+                    </select>
+                    <a href="{% url 'admin_panel:publication_create' %}" class="btn btn-sm btn-primary ms-2">
+                        <i class="ti ti-plus"></i> Создать
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="publications-table" class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th>Заголовок</th>
+                    <th>Тип</th>
+                    <th>Статус</th>
+                    <th>Дата публикации</th>
+                    <th>На главной</th>
+                    <th class="w-1">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pub in publications %}
+                <tr>
+                    <td>{{ pub.title|truncatewords:8 }}</td>
+                    <td>
+                        {% if pub.type == 'news' %}Новость
+                        {% elif pub.type == 'article' %}Статья
+                        {% else %}{{ pub.type }}{% endif %}
+                    </td>
+                    <td>
+                        {% if pub.status == 'draft' %}
+                        <span class="badge bg-secondary text-white">Черновик</span>
+                        {% elif pub.status == 'on_moderation' %}
+                        <span class="badge bg-warning text-dark">На модерации</span>
+                        {% elif pub.status == 'published' %}
+                        <span class="badge bg-success text-white">Опубликовано</span>
+                        {% else %}
+                        <span class="badge bg-secondary text-white">Архив</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ pub.published_at|date:"d.m.Y H:i"|default:"—" }}</td>
+                    <td>{% if pub.is_featured %}<i class="ti ti-star text-warning"></i>{% else %}—{% endif %}</td>
+                    <td>
+                        <div class="btn-list flex-nowrap">
+                            <a href="{% url 'admin_panel:publication_edit' pub.pk %}" class="btn btn-sm btn-primary">
+                                <i class="ti ti-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:publication_delete' pub.pk %}" class="btn btn-sm btn-danger">
+                                <i class="ti ti-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">Публикации не найдены</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        var table = $('#publications-table').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/ru.json'
+            },
+            pageLength: 25,
+            order: [[3, 'desc'], [0, 'asc']],
+            columnDefs: [
+                { orderable: false, targets: 5 }
+            ]
+        });
+        $('#search-input').on('keyup', function() {
+            table.search($(this).val()).draw();
+        });
+        $('#type-filter').on('change', function() {
+            table.column(1).search($(this).val()).draw();
+        });
+        $('#status-filter').on('change', function() {
+            table.column(2).search($(this).val()).draw();
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,535 @@
+openapi: 3.0.3
+info:
+  title: API для программ повышения квалификации
+  version: 1.0.0
+  description: REST API для работы с программами повышения квалификации
+paths:
+  /api/active-programs/:
+    get:
+      operationId: active_programs_list
+      description: Возвращает список всех активных программ повышения квалификации
+        со статусом "active".
+      summary: Список активных программ
+      tags:
+      - Программы
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Program'
+          description: ''
+  /api/applications/:
+    post:
+      operationId: applications_create
+      description: Создаёт заявку слушателя на обучение. Поле batch (поток) необязательно.
+        При успешном создании отправляется уведомление на email администратора.
+      summary: Создать заявку
+      tags:
+      - Заявки
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationCreate'
+          description: ''
+        '400':
+          description: Ошибки валидации
+  /api/programs-with-batches/:
+    get:
+      operationId: programs_with_batches_list
+      description: Возвращает список активных программ с потоками, у которых дата
+        начала >= текущей даты. Программы без подходящих потоков исключаются из ответа.
+      summary: Список программ с потоками
+      tags:
+      - Потоки
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProgramWithBatches'
+          description: ''
+  /api/programs/{program_id}/:
+    get:
+      operationId: programs_retrieve
+      description: "\n        Возвращает полную информацию о программе повышения квалификации\
+        \ по её идентификатору.\n        \n        **Особенности:**\n        - Возвращает\
+        \ все поля программы (название, описание, стоимость, требования и т.д.)\n\
+        \        - Включает список текущих и будущих потоков (дата начала >= текущей\
+        \ даты)\n        - Потоки отсортированы по дате начала (от ближайших к дальним)\n\
+        \        - Для каждого потока возвращается информация о статусе записи и доступности\
+        \ действий\n        \n        **Фильтрация потоков:**\n        - В ответ включаются\
+        \ только потоки с датой начала >= текущей даты\n        - Прошедшие потоки\
+        \ не возвращаются\n        \n        **Ошибки:**\n        - 404: Программа\
+        \ с указанным ID не найдена\n        \n        **Пример использования:**\n\
+        \        ```\n        GET /api/programs/1/\n        ```\n        "
+      summary: Детальная информация о программе
+      parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: integer
+        description: Идентификатор программы (целое число)
+        required: true
+      tags:
+      - Программы
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramDetail'
+          description: ''
+        '404':
+          description: Программа не найдена
+components:
+  schemas:
+    ApplicationCreate:
+      type: object
+      description: Сериализатор для создания заявки слушателя.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          title: ФИО
+          maxLength: 255
+        program:
+          type: integer
+          title: Программа
+        program_name:
+          type: string
+          readOnly: true
+        batch:
+          type: integer
+          nullable: true
+          title: Поток
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          title: Телефон
+          maxLength: 50
+        comment:
+          type: string
+          title: Комментарий
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата создания
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - phone
+      - program
+      - program_name
+    CourseBatch:
+      type: object
+      description: Сериализатор для модели CourseBatch
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          title: Дата начала
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          title: Дата окончания
+        learning_format:
+          type: string
+          readOnly: true
+          description: Форма обучения потока
+        cost:
+          type: string
+          title: Стоимость
+          description: 'Стоимость потока (например: "15000 руб", "Бесплатно")'
+          maxLength: 255
+        status:
+          allOf:
+          - $ref: '#/components/schemas/CourseBatchStatusEnum'
+          title: Статус
+        enrollment_status_text:
+          type: string
+          readOnly: true
+          description: Текст статуса записи
+        action_button_text:
+          type: string
+          readOnly: true
+          description: Текст кнопки действия
+        is_action_enabled:
+          type: boolean
+          readOnly: true
+          description: Доступность действия (записи)
+      required:
+      - action_button_text
+      - enrollment_status_text
+      - id
+      - is_action_enabled
+      - learning_format
+      - start_date
+    CourseBatchStatusEnum:
+      enum:
+      - enrollment_open
+      - enrollment_closed
+      - in_progress
+      - completed
+      - cancelled
+      type: string
+      description: |-
+        * `enrollment_open` - Набор открыт
+        * `enrollment_closed` - Набор закрыт
+        * `in_progress` - Идет обучение
+        * `completed` - Завершен
+        * `cancelled` - Отменен
+    Program:
+      type: object
+      description: Сериализатор для модели Program
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          description: Уникальный идентификатор программы
+        name:
+          type: string
+          title: Название
+          description: Название программы повышения квалификации
+          maxLength: 255
+        direction:
+          type: integer
+          title: Направление
+          description: ID направления (категории) программы
+        direction_name:
+          type: string
+          readOnly: true
+          description: Название направления программы
+        program_type:
+          allOf:
+          - $ref: '#/components/schemas/ProgramTypeEnum'
+          title: Вид программы
+          description: |-
+            Вид программы: повышение квалификации или переподготовка
+
+            * `pk` - Повышение квалификации
+            * `pp` - Переподготовка
+        training_direction_code:
+          type: string
+          title: Код направления подготовки
+          description: Код направления подготовки
+          maxLength: 100
+        lead:
+          type: string
+          title: Лид
+          description: Краткое описание программы (лид)
+        about_description:
+          type: string
+          title: Описание "О программе"
+          description: Подробное описание программы ("О программе")
+        curriculum:
+          type: string
+          title: Программа обучения (учебный план)
+          description: Программа обучения (учебный план)
+        target_audience:
+          type: string
+          title: Целевая аудитория
+          description: Описание целевой аудитории программы
+        enrollment_process:
+          type: string
+          title: Порядок зачисления
+          description: Порядок зачисления на программу
+        learning_format:
+          type: string
+          readOnly: true
+          description: 'Форма обучения (например: "Очная", "Онлайн")'
+        learning_format_comment:
+          type: string
+          title: Комментарий к форме обучения
+          description: 'Комментарий к форме обучения (например: "Программа может быть
+            также реализована заочно")'
+        hours_volume:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Объём программы в часах
+          description: Объём программы в академических часах
+        duration:
+          type: string
+          title: Календарная длительность
+          description: 'Календарная длительность программы (например: "2 месяца",
+            "72 часа")'
+          maxLength: 255
+        cost:
+          type: string
+          title: Стоимость
+          description: 'Стоимость программы (например: "10000 руб", "Бесплатно")'
+          maxLength: 255
+        outcome:
+          type: string
+          title: Итог по программе
+          description: Итог по программе (что получает слушатель после завершения)
+        requirements:
+          type: string
+          title: Требования к слушателям
+          description: Требования к слушателям для зачисления на программу
+        learning_outcomes:
+          type: string
+          title: Результаты обучения
+          description: Результаты обучения (компетенции, которые приобретает слушатель)
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ProgramStatusEnum'
+          title: Статус
+          description: |-
+            Статус программы: "draft" (черновик), "active" (активен), "archived" (архив)
+
+            * `draft` - Черновик
+            * `active` - Активен
+            * `archived` - Архив
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата создания
+          description: Дата и время создания записи программы
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата обновления
+          description: Дата и время последнего обновления записи программы
+      required:
+      - about_description
+      - cost
+      - created_at
+      - curriculum
+      - direction
+      - direction_name
+      - duration
+      - hours_volume
+      - id
+      - lead
+      - learning_format
+      - name
+      - program_type
+      - target_audience
+      - updated_at
+    ProgramDetail:
+      type: object
+      description: Сериализатор для детального просмотра программы с потоками
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          description: Уникальный идентификатор программы
+        name:
+          type: string
+          title: Название
+          description: Название программы повышения квалификации
+          maxLength: 255
+        direction:
+          type: integer
+          title: Направление
+          description: ID направления (категории) программы
+        direction_name:
+          type: string
+          readOnly: true
+          description: Название направления программы
+        program_type:
+          allOf:
+          - $ref: '#/components/schemas/ProgramTypeEnum'
+          title: Вид программы
+          description: |-
+            Вид программы: повышение квалификации или переподготовка
+
+            * `pk` - Повышение квалификации
+            * `pp` - Переподготовка
+        training_direction_code:
+          type: string
+          title: Код направления подготовки
+          description: Код направления подготовки
+          maxLength: 100
+        lead:
+          type: string
+          title: Лид
+          description: Краткое описание программы (лид)
+        about_description:
+          type: string
+          title: Описание "О программе"
+          description: Подробное описание программы ("О программе")
+        curriculum:
+          type: string
+          title: Программа обучения (учебный план)
+          description: Программа обучения (учебный план)
+        target_audience:
+          type: string
+          title: Целевая аудитория
+          description: Описание целевой аудитории программы
+        enrollment_process:
+          type: string
+          title: Порядок зачисления
+          description: Порядок зачисления на программу
+        learning_format:
+          type: string
+          readOnly: true
+          description: 'Форма обучения (например: "Очная", "Онлайн")'
+        learning_format_comment:
+          type: string
+          title: Комментарий к форме обучения
+          description: 'Комментарий к форме обучения (например: "Программа может быть
+            также реализована заочно")'
+        hours_volume:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Объём программы в часах
+          description: Объём программы в академических часах
+        duration:
+          type: string
+          title: Календарная длительность
+          description: 'Календарная длительность программы (например: "2 месяца",
+            "72 часа")'
+          maxLength: 255
+        outcome:
+          type: string
+          title: Итог по программе
+          description: Итог по программе (что получает слушатель после завершения)
+        requirements:
+          type: string
+          title: Требования к слушателям
+          description: Требования к слушателям для зачисления на программу
+        learning_outcomes:
+          type: string
+          title: Результаты обучения
+          description: Результаты обучения (компетенции, которые приобретает слушатель)
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ProgramStatusEnum'
+          title: Статус
+          description: |-
+            Статус программы: "draft" (черновик), "active" (активен), "archived" (архив)
+
+            * `draft` - Черновик
+            * `active` - Активен
+            * `archived` - Архив
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата создания
+          description: Дата и время создания записи программы
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата обновления
+          description: Дата и время последнего обновления записи программы
+        batches:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseBatch'
+          readOnly: true
+          description: Список текущих и будущих потоков программы (дата начала >=
+            текущей даты)
+      required:
+      - about_description
+      - batches
+      - created_at
+      - curriculum
+      - direction
+      - direction_name
+      - duration
+      - hours_volume
+      - id
+      - lead
+      - learning_format
+      - name
+      - program_type
+      - target_audience
+      - updated_at
+    ProgramStatusEnum:
+      enum:
+      - draft
+      - active
+      - archived
+      type: string
+      description: |-
+        * `draft` - Черновик
+        * `active` - Активен
+        * `archived` - Архив
+    ProgramTypeEnum:
+      enum:
+      - pk
+      - pp
+      type: string
+      description: |-
+        * `pk` - Повышение квалификации
+        * `pp` - Переподготовка
+    ProgramWithBatches:
+      type: object
+      description: Сериализатор для программы с потоками
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Название
+          description: Название программы повышения квалификации
+          maxLength: 255
+        direction_name:
+          type: string
+          readOnly: true
+          description: Название направления (категория) программы
+        learning_format:
+          type: string
+          readOnly: true
+          description: 'Форма обучения программы (например: "Очная", "Онлайн")'
+        hours_volume:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Объём программы в часах
+          description: Объём программы в академических часах
+        batches:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseBatch'
+          readOnly: true
+          description: Список потоков программы
+      required:
+      - batches
+      - direction_name
+      - hours_volume
+      - id
+      - learning_format
+      - name

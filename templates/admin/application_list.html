@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Заявки слушателей{% endblock %}
+
+{% block page_title %}Заявки слушателей{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+    {% include 'admin/_section_nav_cards.html' with active_section='applications' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="card-title">Список заявок</h3>
+            </div>
+            <div class="col-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Поиск..." style="width: 200px;">
+                    <select id="status-filter" class="form-select form-select-sm" style="width: auto;">
+                        <option value="">Все статусы</option>
+                        <option value="Новая">Новая</option>
+                        <option value="В работе">В работе</option>
+                        <option value="Подтверждена">Подтверждена</option>
+                        <option value="Отклонена">Отклонена</option>
+                        <option value="Завершена">Завершена</option>
+                    </select>
+                    <a href="{% url 'admin_panel:application_create' %}" class="btn btn-sm btn-primary ms-2">
+                        <i class="ti ti-plus"></i> Создать
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="applications-table" class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Программа</th>
+                    <th>Поток</th>
+                    <th>Email</th>
+                    <th>Телефон</th>
+                    <th>Дата создания</th>
+                    <th>Статус</th>
+                    <th class="w-1">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td>{{ application.full_name }}</td>
+                    <td>{{ application.program.name }}</td>
+                    <td>{{ application.batch|default:"—" }}</td>
+                    <td>{{ application.email }}</td>
+                    <td>{{ application.phone }}</td>
+                    <td>{{ application.created_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        {% if application.status == 'new' %}
+                        <span class="badge bg-secondary text-white">Новая</span>
+                        {% elif application.status == 'in_progress' %}
+                        <span class="badge bg-info text-white">В работе</span>
+                        {% elif application.status == 'confirmed' %}
+                        <span class="badge bg-success text-white">Подтверждена</span>
+                        {% elif application.status == 'rejected' %}
+                        <span class="badge bg-danger text-white">Отклонена</span>
+                        {% elif application.status == 'completed' %}
+                        <span class="badge bg-primary text-white">Завершена</span>
+                        {% else %}
+                        <span class="badge bg-secondary text-white">{{ application.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-list flex-nowrap">
+                            <a href="{% url 'admin_panel:application_edit' application.pk %}" class="btn btn-sm btn-primary">
+                                <i class="ti ti-edit"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:application_delete' application.pk %}" class="btn btn-sm btn-danger">
+                                <i class="ti ti-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        var table = $('#applications-table').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/ru.json',
+                emptyTable: 'Заявки не найдены'
+            },
+            pageLength: 25,
+            order: [[5, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: 7 }
+            ]
+        });
+
+        $('#search-input').on('keyup', function() {
+            table.search($(this).val()).draw();
+        });
+
+        $('#status-filter').on('change', function() {
+            var status = $(this).val();
+            table.column(6).search(status).draw();
+        });
+    });
+</script>
+{% endblock %}

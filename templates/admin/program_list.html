@@ -37,6 +37,7 @@
         <table id="programs-table" class="table table-vcenter card-table">
             <thead>
                 <tr>
+                    <th>Позиция</th>
                     <th>Название</th>
                     <th>Направление</th>
                     <th>Статус</th>
@@ -48,6 +49,7 @@
             <tbody>
                 {% for program in programs %}
                 <tr>
+                    <td>{{ program.position }}</td>
                     <td>{{ program.name }}</td>
                     <td>{{ program.direction.name }}</td>
                     <td>
@@ -74,7 +76,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center text-muted">Программы не найдены</td>
+                    <td colspan="7" class="text-center text-muted">Программы не найдены</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -93,7 +95,7 @@
             pageLength: 25,
             order: [[0, 'asc']],
             columnDefs: [
-                { orderable: false, targets: 5 }
+                { orderable: false, targets: 6 }
             ]
         });
         
@@ -105,7 +107,7 @@
         // Фильтр по статусу
         $('#status-filter').on('change', function() {
             var status = $(this).val();
-            table.column(2).search(status).draw();
+            table.column(3).search(status).draw();
         });
     });
 </script>

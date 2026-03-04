@@ -49,6 +49,18 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Позиция</label>
+                        {{ form.position }}
+                        {% if form.position.errors %}
+                        <div class="text-danger">{{ form.position.errors }}</div>
+                        {% endif %}
+                        <small class="form-hint">Порядок сортировки программы (меньше — выше в списке)</small>
+                    </div>
+                </div>
+            </div>
             <div class="mb-3">
                 <label class="form-label required">Лид</label>
                 {{ form.lead }}

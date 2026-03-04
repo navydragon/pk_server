@@ -106,7 +106,7 @@ class ActiveProgramsApiTests(APITestCase):
         if response.data:
             item = response.data[0]
             expected_fields = [
-                'id', 'name', 'direction', 'direction_name', 'program_type', 'training_direction_code', 'lead',
+                'id', 'position', 'name', 'direction', 'direction_name', 'program_type', 'training_direction_code', 'lead',
                 'about_description', 'curriculum', 'target_audience',
                 'enrollment_process', 'learning_format', 'learning_format_comment', 'hours_volume',
                 'duration', 'cost', 'outcome', 'requirements',
@@ -224,7 +224,7 @@ class ProgramsWithBatchesApiTests(APITestCase):
         
         if response.data:
             program = response.data[0]
-            expected_program_fields = ['id', 'name', 'direction_name', 'learning_format', 'hours_volume', 'batches']
+            expected_program_fields = ['id', 'position', 'name', 'direction_name', 'learning_format', 'hours_volume', 'batches']
             for field in expected_program_fields:
                 self.assertIn(field, program)
 

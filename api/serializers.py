@@ -23,6 +23,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         model = Program
         fields = [
             'id',
+            'position',
             'name',
             'direction',
             'direction_name',
@@ -133,6 +134,7 @@ class ProgramWithBatchesSerializer(serializers.ModelSerializer):
         model = Program
         fields = [
             'id',
+            'position',
             'name',
             'direction_name',
             'learning_format',
@@ -162,6 +164,7 @@ class ProgramDetailSerializer(serializers.ModelSerializer):
         model = Program
         fields = [
             'id',
+            'position',
             'name',
             'direction',
             'direction_name',

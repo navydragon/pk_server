@@ -48,15 +48,15 @@ class LearningFormatAdmin(admin.ModelAdmin):
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
     """Админка для программы"""
-    list_display = ('name', 'direction', 'program_type', 'status', 'hours_volume', 'created_at')
+    list_display = ('position', 'name', 'direction', 'program_type', 'status', 'hours_volume', 'created_at')
     list_filter = ('status', 'direction', 'program_type', 'learning_format', 'created_at')
     search_fields = ('name', 'lead', 'target_audience')
     raw_id_fields = ('direction',)
-    ordering = ('name',)
+    ordering = ('position', 'name')
     
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'direction', 'program_type', 'training_direction_code', 'lead', 'status')
+            'fields': ('name', 'direction', 'program_type', 'training_direction_code', 'position', 'lead', 'status')
         }),
         ('Описание', {
             'fields': ('about_description', 'curriculum', 'target_audience', 'enrollment_process')

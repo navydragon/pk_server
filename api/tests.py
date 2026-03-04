@@ -67,6 +67,35 @@ class ActiveProgramsApiTests(APITestCase):
         # Проверяем, что черновик не попал в ответ
         self.assertNotIn(self.draft_program.name, program_names)
 
+    def test_active_programs_sorted_by_position(self):
+        """Проверяем, что программы возвращаются отсортированными по position"""
+        # Создаём вторую активную программу с большим position
+        Program.objects.filter(pk=self.active_program.pk).update(position=10)
+        program_b = Program.objects.create(
+            name='Программа B (position=5)',
+            direction=self.direction,
+            program_type=ProgramType.QUALIFICATION_UPGRADE,
+            lead='Лид',
+            about_description='Описание',
+            curriculum='План',
+            target_audience='Аудитория',
+            hours_volume=72,
+            duration='2 месяца',
+            cost='10000 руб',
+            status=ProgramStatus.ACTIVE,
+            position=5,
+        )
+
+        url = reverse('active-programs')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        program_names = [p['name'] for p in response.data]
+        # Программа B (position=5) должна идти перед активной (position=10)
+        idx_b = program_names.index(program_b.name)
+        idx_a = program_names.index(self.active_program.name)
+        self.assertLess(idx_b, idx_a)
+
     def test_active_programs_endpoint_returns_correct_fields(self):
         """Проверяем, что в ответе есть все необходимые поля"""
         url = reverse('active-programs')

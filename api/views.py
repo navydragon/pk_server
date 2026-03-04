@@ -53,7 +53,7 @@ class ActiveProgramsView(APIView):
         tags=['Программы'],
     )
     def get(self, request, *args, **kwargs):
-        programs = Program.objects.filter(status=ProgramStatus.ACTIVE).select_related('direction', 'learning_format')
+        programs = Program.objects.filter(status=ProgramStatus.ACTIVE).select_related('direction', 'learning_format').order_by('position', 'name')
         serializer = ProgramSerializer(programs, many=True)
         return Response(serializer.data)
 
@@ -95,7 +95,7 @@ class ProgramsWithBatchesView(APIView):
             'direction'
         ).prefetch_related(
             batches_prefetch
-        )
+        ).order_by('position', 'name')
 
         # Фильтруем программы, у которых есть потоки после фильтрации по дате
         programs_with_batches = [

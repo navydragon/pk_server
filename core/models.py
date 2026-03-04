@@ -189,6 +189,11 @@ class Program(models.Model):
         verbose_name='Статус',
         help_text='Статус программы: "draft" (черновик), "active" (активен), "archived" (архив)'
     )
+    position = models.IntegerField(
+        default=0,
+        verbose_name='Позиция',
+        help_text='Порядок сортировки программы'
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания',
@@ -203,7 +208,7 @@ class Program(models.Model):
     class Meta:
         verbose_name = 'Программа'
         verbose_name_plural = 'Программы'
-        ordering = ['name']
+        ordering = ['position', 'name']
 
     def __str__(self):
         return self.name

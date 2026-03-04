@@ -59,12 +59,12 @@ class Command(BaseCommand):
         updated_count = 0
         skipped_count = 0
 
-        with file_path.open('r', encoding='utf-8', newline='') as f:
+        with file_path.open('r', encoding='utf-8-sig', newline='') as f:
             reader = csv.DictReader(f, delimiter=';')
 
             for row in reader:
                 try:
-                    program = self._import_row(row)
+                    program, created = self._import_row(row)
                 except Exception as exc:
                     skipped_count += 1
                     self.stderr.write(
@@ -74,9 +74,7 @@ class Command(BaseCommand):
                     )
                     continue
 
-                if program._state.adding:
-                    # Для только что созданных объектов _state.adding уже False,
-                    # поэтому определяем по флагу, который возвращает _import_row
+                if created:
                     created_count += 1
                 else:
                     updated_count += 1
@@ -159,7 +157,7 @@ class Command(BaseCommand):
         )
         return learning_format
 
-    def _import_row(self, row: dict) -> Program:
+    def _import_row(self, row: dict) -> tuple[Program, bool]:
         """
         Импорт одной строки CSV.
 
@@ -167,6 +165,12 @@ class Command(BaseCommand):
         id;direction_name;name;training_direction_code;program_type;learning_format;
         hours_volume;cost;about_description;lead;duration;status
         """
+        csv_id_raw = row.get('id', '')
+        try:
+            position = int(csv_id_raw) if csv_id_raw else 0
+        except (ValueError, TypeError):
+            position = 0
+
         direction_name = row.get('direction_name', '')
         name = (row.get('name') or '').strip()
         training_direction_code = (row.get('training_direction_code') or '').strip()
@@ -197,6 +201,7 @@ class Command(BaseCommand):
         program, created = Program.objects.update_or_create(
             name=name,
             defaults={
+                'position': position,
                 'direction': direction,
                 'program_type': program_type,
                 'training_direction_code': training_direction_code,
@@ -220,6 +225,5 @@ class Command(BaseCommand):
         action = 'Создана' if created else 'Обновлена'
         self.stdout.write(f'[{action}] программа: {program.name}')
 
-        # Возвращаем объект программы; флаг созданности учитываем при подсчёте выше
-        return program
+        return program, created
 

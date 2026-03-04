@@ -37,8 +37,8 @@ class ProgramForm(forms.ModelForm):
     class Meta:
         model = Program
         fields = [
-            'name', 'direction', 'program_type', 'training_direction_code', 'lead', 'about_description', 'curriculum',
-            'target_audience', 'enrollment_process', 'learning_format', 'learning_format_comment',
+            'name', 'direction', 'program_type', 'training_direction_code', 'position', 'lead', 'about_description',
+            'curriculum', 'target_audience', 'enrollment_process', 'learning_format', 'learning_format_comment',
             'hours_volume', 'duration', 'cost', 'outcome', 'requirements',
             'learning_outcomes', 'status'
         ]
@@ -47,6 +47,7 @@ class ProgramForm(forms.ModelForm):
             'direction': forms.Select(attrs={'class': 'form-select'}),
             'program_type': forms.Select(attrs={'class': 'form-select'}),
             'training_direction_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'position': forms.NumberInput(attrs={'class': 'form-control'}),
             'lead': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'about_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
             'curriculum': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),

@@ -175,6 +175,7 @@ class Command(BaseCommand):
             program = Program.objects.create(
                 name=name,
                 direction=direction,
+                position=i,
                 program_type=random.choice([ProgramType.QUALIFICATION_UPGRADE, ProgramType.RETRAINING]),
                 training_direction_code=fake.bothify(text='??-####', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ') if random.random() > 0.7 else '',
                 lead=fake.text(max_nb_chars=300),

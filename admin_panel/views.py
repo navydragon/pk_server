@@ -157,7 +157,7 @@ class ProgramListView(ListView):
     paginate_by = None  # DataTables будет обрабатывать пагинацию на клиенте
 
     def get_queryset(self):
-        return Program.objects.select_related('direction', 'learning_format')
+        return Program.objects.select_related('direction', 'learning_format').order_by('position', 'name')
 
 
 @method_decorator(login_required, name='dispatch')

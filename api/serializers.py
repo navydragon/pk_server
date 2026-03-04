@@ -176,6 +176,7 @@ class ProgramDetailSerializer(serializers.ModelSerializer):
             'learning_format_comment',
             'hours_volume',
             'duration',
+            'cost',
             'outcome',
             'requirements',
             'learning_outcomes',

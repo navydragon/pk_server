@@ -50,12 +50,55 @@ def send_callback_request_notification(callback_request):
     context = {
         'name': callback_request.name,
         'phone': callback_request.phone,
-        'email': callback_request.email,
+        'email': callback_request.email or '—',
+        'request_type': (
+            callback_request.get_request_type_display()
+            if callback_request.request_type else '—'
+        ),
+        'comment': callback_request.comment or '—',
         'created_at': callback_request.created_at.strftime('%d.%m.%Y %H:%M'),
     }
 
     subject = f'Запрос обратного звонка: {callback_request.name}'
     message = render_to_string('emails/callback_request_created.txt', context)
+
+    return send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[recipient],
+        fail_silently=False,
+    )
+
+
+def send_corporate_request_notification(corporate_request):
+    """
+    Отправляет уведомление о корпоративном запросе на email из NOTIFICATION_EMAIL.
+
+    Не отправляет письмо, если NOTIFICATION_EMAIL не задан.
+    """
+    recipient = getattr(settings, 'NOTIFICATION_EMAIL', '') or ''
+    if not recipient:
+        return 0
+
+    context = {
+        'organization_name': corporate_request.organization_name,
+        'contact_name': corporate_request.contact_name,
+        'contact_position': corporate_request.contact_position or '—',
+        'phone': corporate_request.phone,
+        'email': corporate_request.email,
+        'topics': corporate_request.topics,
+        'employees_count': corporate_request.employees_count,
+        'desired_dates': corporate_request.desired_dates or '—',
+        'comment': corporate_request.comment or '—',
+        'created_at': corporate_request.created_at.strftime('%d.%m.%Y %H:%M'),
+    }
+
+    subject = (
+        f'Корпоративный запрос: {corporate_request.organization_name} — '
+        f'{corporate_request.contact_name}'
+    )
+    message = render_to_string('emails/corporate_request_created.txt', context)
 
     return send_mail(
         subject=subject,

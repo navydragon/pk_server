@@ -13,13 +13,14 @@ from rest_framework.status import HTTP_201_CREATED
 from rest_framework.views import APIView
 
 from core.choices import ProgramStatus
-from core.models import Application, CallbackRequest, CourseBatch, Program
+from core.models import Application, CallbackRequest, CorporateRequest, CourseBatch, Program
 from publications.choices import PublicationStatus, PublicationType
 from publications.models import Case, Publication, Testimonial
 
 from .serializers import (
     ApplicationCreateSerializer,
     CallbackRequestCreateSerializer,
+    CorporateRequestCreateSerializer,
     ProgramDetailSerializer,
     ProgramSerializer,
     ProgramWithBatchesSerializer,
@@ -197,6 +198,12 @@ def _send_callback_request_notification(callback_request):
     send_callback_request_notification(callback_request)
 
 
+def _send_corporate_request_notification(corporate_request):
+    """Импорт и вызов отправки уведомления о корпоративном запросе."""
+    from emails.services import send_corporate_request_notification
+    send_corporate_request_notification(corporate_request)
+
+
 class ApplicationCreateView(APIView):
     """
     Создание заявки слушателя на обучение.
@@ -257,6 +264,37 @@ class CallbackRequestCreateView(APIView):
         serializer.is_valid(raise_exception=True)
         callback_request = serializer.save()
         _send_callback_request_notification(callback_request)
+        return Response(serializer.data, status=HTTP_201_CREATED)
+
+
+class CorporateRequestCreateView(APIView):
+    """
+    Создание корпоративного запроса на коммерческое предложение.
+
+    Эндпоинт открыт: не использует аутентификацию.
+    При успешном создании отправляется email-уведомление на NOTIFICATION_EMAIL.
+    """
+
+    authentication_classes: list = []
+    permission_classes: list = []
+    renderer_classes = [JSONRenderer]
+
+    @extend_schema(
+        summary='Создать корпоративный запрос',
+        description='Создаёт запрос организации на коммерческое предложение. '
+                    'При успешном создании отправляется уведомление на email администратора.',
+        request=CorporateRequestCreateSerializer,
+        responses={
+            201: CorporateRequestCreateSerializer,
+            400: OpenApiResponse(description='Ошибки валидации'),
+        },
+        tags=['Корпоративные запросы'],
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = CorporateRequestCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        corporate_request = serializer.save()
+        _send_corporate_request_notification(corporate_request)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
 

@@ -14,23 +14,21 @@
                 {{ form.non_field_errors }}
             </div>
             {% endif %}
+
+            <h3 class="mb-3">Контактные данные</h3>
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label required">ФИО</label>
                         {{ form.full_name }}
-                        {% if form.full_name.errors %}
-                        <div class="text-danger">{{ form.full_name.errors }}</div>
-                        {% endif %}
+                        {% if form.full_name.errors %}<div class="text-danger">{{ form.full_name.errors }}</div>{% endif %}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label required">Email</label>
                         {{ form.email }}
-                        {% if form.email.errors %}
-                        <div class="text-danger">{{ form.email.errors }}</div>
-                        {% endif %}
+                        {% if form.email.errors %}<div class="text-danger">{{ form.email.errors }}</div>{% endif %}
                     </div>
                 </div>
             </div>
@@ -39,56 +37,70 @@
                     <div class="mb-3">
                         <label class="form-label required">Телефон</label>
                         {{ form.phone }}
-                        {% if form.phone.errors %}
-                        <div class="text-danger">{{ form.phone.errors }}</div>
-                        {% endif %}
+                        {% if form.phone.errors %}<div class="text-danger">{{ form.phone.errors }}</div>{% endif %}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label class="form-label required">Программа</label>
-                        {{ form.program }}
-                        {% if form.program.errors %}
-                        <div class="text-danger">{{ form.program.errors }}</div>
-                        {% endif %}
+                        <label class="form-label">Предпочтительный способ связи</label>
+                        {{ form.preferred_contact }}
+                        {% if form.preferred_contact.errors %}<div class="text-danger">{{ form.preferred_contact.errors }}</div>{% endif %}
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label class="form-label">Поток</label>
-                        {{ form.batch }}
-                        {% if form.batch.errors %}
-                        <div class="text-danger">{{ form.batch.errors }}</div>
-                        {% endif %}
-                        <small class="form-hint">Сначала выберите программу. При создании заявки выберите программу и отправьте форму, чтобы обновить список потоков.</small>
+                        <label class="form-label required">Программа</label>
+                        {{ form.program }}
+                        {% if form.program.errors %}<div class="text-danger">{{ form.program.errors }}</div>{% endif %}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label class="form-label required">Статус</label>
-                        {{ form.status }}
-                        {% if form.status.errors %}
-                        <div class="text-danger">{{ form.status.errors }}</div>
-                        {% endif %}
+                        <label class="form-label">Поток</label>
+                        {{ form.batch }}
+                        {% if form.batch.errors %}<div class="text-danger">{{ form.batch.errors }}</div>{% endif %}
+                        <small class="form-hint">Сначала выберите программу.</small>
                     </div>
                 </div>
             </div>
             <div class="mb-3">
                 <label class="form-label">Комментарий слушателя</label>
                 {{ form.comment }}
-                {% if form.comment.errors %}
-                <div class="text-danger">{{ form.comment.errors }}</div>
-                {% endif %}
+                {% if form.comment.errors %}<div class="text-danger">{{ form.comment.errors }}</div>{% endif %}
+            </div>
+
+            <hr>
+            <h3 class="mb-3">Обработка</h3>
+            <p class="text-muted small">Рекомендуемый порядок: Новая → В работе → Подтверждена / Отклонена → Завершена</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label required">Статус</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}<div class="text-danger">{{ form.status.errors }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Ответственный</label>
+                        {{ form.assigned_to }}
+                        {% if form.assigned_to.errors %}<div class="text-danger">{{ form.assigned_to.errors }}</div>{% endif %}
+                    </div>
+                </div>
             </div>
             <div class="mb-3">
                 <label class="form-label">Комментарий администратора</label>
                 {{ form.admin_comment }}
-                {% if form.admin_comment.errors %}
-                <div class="text-danger">{{ form.admin_comment.errors }}</div>
-                {% endif %}
+                {% if form.admin_comment.errors %}<div class="text-danger">{{ form.admin_comment.errors }}</div>{% endif %}
             </div>
+            {% if object %}
+            <div class="mb-3 text-muted small">
+                Создано: {{ object.created_at|date:"d.m.Y H:i" }} · Обновлено: {{ object.updated_at|date:"d.m.Y H:i" }}
+            </div>
+            {% endif %}
+
             <div class="form-footer">
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <a href="{% url 'admin_panel:application_list' %}" class="btn btn-secondary">Отмена</a>

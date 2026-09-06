@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'admin_panel',
     'api',
     'emails',
+    'advisor',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'admin_panel.context_processors.staff_permissions',
             ],
         },
     },
@@ -143,12 +145,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
+# Префикс backend-static/, чтобы не пересекаться с фронтовым /static/ за одним прокси.
 
 STATIC_URL = 'backend-static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+_STATIC_DIR = BASE_DIR / 'static'
+STATICFILES_DIRS = [_STATIC_DIR] if _STATIC_DIR.is_dir() else []
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -261,3 +263,9 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@localhost')
 NOTIFICATION_EMAIL = config('NOTIFICATION_EMAIL', default='')
+
+# OpenAI-compatible LLM for advisor chat (PydanticAI)
+LLM_API_KEY = config('LLM_API_KEY', default='')
+LLM_BASE_URL = config('LLM_BASE_URL', default='')
+LLM_MODEL = config('LLM_MODEL', default='')
+LLM_TIMEOUT = config('LLM_TIMEOUT', default=25, cast=int)

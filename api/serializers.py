@@ -2,7 +2,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from core.choices import ApplicationStatus, CourseBatchStatus
-from core.models import Application, CallbackRequest, CourseBatch, Program
+from core.models import Application, CallbackRequest, CorporateRequest, CourseBatch, Program
 from publications.choices import PublicationStatus, PublicationType
 from publications.models import Case, Publication, Testimonial
 
@@ -73,9 +73,12 @@ class CourseBatchSerializer(serializers.ModelSerializer):
         model = CourseBatch
         fields = [
             'id',
+            'name',
             'start_date',
             'end_date',
             'learning_format',
+            'schedule',
+            'seats_count',
             'cost',
             'status',
             'enrollment_status_text',
@@ -201,12 +204,16 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ['id', 'full_name', 'program', 'program_name', 'batch', 'email', 'phone', 'comment', 'created_at']
+        fields = [
+            'id', 'full_name', 'program', 'program_name', 'batch',
+            'email', 'phone', 'preferred_contact', 'comment', 'created_at',
+        ]
         extra_kwargs = {
             'id': {'read_only': True},
             'created_at': {'read_only': True},
             'batch': {'required': False, 'allow_null': True},
             'comment': {'required': False, 'allow_blank': True},
+            'preferred_contact': {'required': False, 'allow_blank': True},
         }
 
     def validate(self, attrs):
@@ -229,11 +236,55 @@ class CallbackRequestCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CallbackRequest
-        fields = ['id', 'name', 'phone', 'email', 'created_at']
+        fields = [
+            'id', 'name', 'phone', 'email', 'request_type',
+            'comment', 'created_at',
+        ]
         extra_kwargs = {
             'id': {'read_only': True},
             'created_at': {'read_only': True},
+            'email': {'required': False, 'allow_blank': True},
+            'request_type': {'required': False, 'allow_blank': True},
+            'comment': {'required': False, 'allow_blank': True},
         }
+
+    def create(self, validated_data):
+        from core.choices import CallbackRequestStatus
+        validated_data['status'] = CallbackRequestStatus.NEW
+        return super().create(validated_data)
+
+
+class CorporateRequestCreateSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания корпоративного запроса."""
+
+    class Meta:
+        model = CorporateRequest
+        fields = [
+            'id', 'organization_name', 'contact_name', 'contact_position',
+            'phone', 'email', 'topics', 'directions', 'programs',
+            'employees_count', 'desired_dates', 'comment', 'created_at',
+        ]
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'created_at': {'read_only': True},
+            'contact_position': {'required': False, 'allow_blank': True},
+            'desired_dates': {'required': False, 'allow_blank': True},
+            'comment': {'required': False, 'allow_blank': True},
+            'directions': {'required': False},
+            'programs': {'required': False},
+        }
+
+    def create(self, validated_data):
+        from core.choices import CorporateRequestStatus
+        directions = validated_data.pop('directions', [])
+        programs = validated_data.pop('programs', [])
+        validated_data['status'] = CorporateRequestStatus.NEW
+        instance = super().create(validated_data)
+        if directions:
+            instance.directions.set(directions)
+        if programs:
+            instance.programs.set(programs)
+        return instance
 
 
 # --- Publications API ---

@@ -1,12 +1,18 @@
+from django.conf import settings
 from django.db import models
 
 from .choices import (
     ApplicationStatus,
+    CallbackRequestStatus,
+    CallbackRequestType,
+    CorporateRequestStatus,
     CourseBatchStatus,
     DirectionStatus,
     LearningFormatStatus,
+    PreferredContact,
     ProgramStatus,
     ProgramType,
+    StaffRole,
 )
 
 
@@ -310,6 +316,12 @@ class Application(models.Model):
         max_length=50,
         verbose_name='Телефон'
     )
+    preferred_contact = models.CharField(
+        max_length=20,
+        choices=PreferredContact.CHOICES,
+        blank=True,
+        verbose_name='Предпочтительный способ связи'
+    )
     comment = models.TextField(
         blank=True,
         verbose_name='Комментарий'
@@ -317,6 +329,10 @@ class Application(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
     )
     status = models.CharField(
         max_length=20,
@@ -328,6 +344,14 @@ class Application(models.Model):
         blank=True,
         verbose_name='Комментарий администратора'
     )
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_applications',
+        verbose_name='Ответственный'
+    )
 
     class Meta:
         verbose_name = 'Заявка слушателя'
@@ -338,14 +362,134 @@ class Application(models.Model):
         return f'{self.full_name} — {self.program.name}'
 
 
+class CorporateRequest(models.Model):
+    """Корпоративный запрос на коммерческое предложение"""
+    organization_name = models.CharField(
+        max_length=255,
+        verbose_name='Название организации'
+    )
+    contact_name = models.CharField(
+        max_length=255,
+        verbose_name='ФИО контактного лица'
+    )
+    contact_position = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name='Должность контактного лица'
+    )
+    phone = models.CharField(
+        max_length=50,
+        verbose_name='Телефон'
+    )
+    email = models.EmailField(
+        verbose_name='Email'
+    )
+    topics = models.TextField(
+        verbose_name='Интересующие направления/темы'
+    )
+    directions = models.ManyToManyField(
+        Direction,
+        blank=True,
+        related_name='corporate_requests',
+        verbose_name='Направления'
+    )
+    programs = models.ManyToManyField(
+        Program,
+        blank=True,
+        related_name='corporate_requests',
+        verbose_name='Программы'
+    )
+    employees_count = models.PositiveIntegerField(
+        verbose_name='Ориентировочное количество сотрудников'
+    )
+    desired_dates = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name='Желаемые сроки'
+    )
+    comment = models.TextField(
+        blank=True,
+        verbose_name='Дополнительные комментарии'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=CorporateRequestStatus.CHOICES,
+        default=CorporateRequestStatus.NEW,
+        verbose_name='Статус'
+    )
+    admin_comment = models.TextField(
+        blank=True,
+        verbose_name='Комментарий администратора'
+    )
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_corporate_requests',
+        verbose_name='Ответственный'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+
+    class Meta:
+        verbose_name = 'Корпоративный запрос'
+        verbose_name_plural = 'Корпоративные запросы'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.organization_name} — {self.contact_name}'
+
+
 class CallbackRequest(models.Model):
     """Запрос на обратный звонок"""
     name = models.CharField(max_length=255, verbose_name='Имя')
     phone = models.CharField(max_length=50, verbose_name='Телефон')
-    email = models.EmailField(verbose_name='Email')
+    email = models.EmailField(
+        blank=True,
+        verbose_name='Email'
+    )
+    request_type = models.CharField(
+        max_length=20,
+        choices=CallbackRequestType.CHOICES,
+        blank=True,
+        verbose_name='Тип обращения'
+    )
+    comment = models.TextField(
+        blank=True,
+        verbose_name='Комментарий/вопрос'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=CallbackRequestStatus.CHOICES,
+        default=CallbackRequestStatus.NEW,
+        verbose_name='Статус'
+    )
+    admin_comment = models.TextField(
+        blank=True,
+        verbose_name='Комментарий администратора'
+    )
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_callback_requests',
+        verbose_name='Ответственный'
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
     )
 
     class Meta:
@@ -355,3 +499,44 @@ class CallbackRequest(models.Model):
 
     def __str__(self):
         return f'{self.name} — {self.phone}'
+
+
+class StaffProfile(models.Model):
+    """Профиль сотрудника админ-панели"""
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='staff_profile',
+        verbose_name='Пользователь'
+    )
+    full_name = models.CharField(
+        max_length=255,
+        verbose_name='ФИО'
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=StaffRole.CHOICES,
+        default=StaffRole.EDITOR,
+        verbose_name='Роль'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Активен'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    last_login_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Дата последнего входа'
+    )
+
+    class Meta:
+        verbose_name = 'Профиль сотрудника'
+        verbose_name_plural = 'Профили сотрудников'
+        ordering = ['full_name']
+
+    def __str__(self):
+        return f'{self.full_name} ({self.get_role_display()})'

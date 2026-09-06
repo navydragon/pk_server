@@ -1,0 +1,12 @@
+Корпоративный запрос на коммерческое предложение
+
+Организация: {{ organization_name }}
+Контактное лицо: {{ contact_name }}
+Должность: {{ contact_position }}
+Телефон: {{ phone }}
+Email: {{ email }}
+Интересующие темы: {{ topics }}
+Количество сотрудников: {{ employees_count }}
+Желаемые сроки: {{ desired_dates }}
+Комментарий: {{ comment }}
+Дата подачи: {{ created_at }}

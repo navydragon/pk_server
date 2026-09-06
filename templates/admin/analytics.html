@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Аналитика{% endblock %}
+
+{% block page_title %}Базовая аналитика{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+    {% include 'admin/_section_nav_cards.html' with active_section='analytics' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label">Период</label>
+                <select name="preset" class="form-select form-select-sm" id="preset-select">
+                    <option value="">Свой интервал</option>
+                    <option value="7" {% if filters.preset == '7' %}selected{% endif %}>7 дней</option>
+                    <option value="30" {% if filters.preset == '30' or not filters.preset and not request.GET.date_from %}selected{% endif %}>30 дней</option>
+                    <option value="90" {% if filters.preset == '90' %}selected{% endif %}>90 дней</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">С</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">По</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
+            </div>
+            {% if include_crm or include_catalog %}
+            <div class="col-md-2">
+                <label class="form-label">Направление</label>
+                <select name="direction" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    {% for direction in directions %}
+                    <option value="{{ direction.id }}" {% if filters.direction == direction.id|stringformat:"s" %}selected{% endif %}>{{ direction.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            {% if include_crm %}
+            <div class="col-md-2">
+                <label class="form-label">Ответственный</label>
+                <select name="assigned_to" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    <option value="none" {% if filters.assigned_to == 'none' %}selected{% endif %}>Не назначен</option>
+                    {% for user in assignees %}
+                    <option value="{{ user.id }}" {% if filters.assigned_to == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-primary">Применить</button>
+                <a href="{% url 'admin_panel:analytics' %}" class="btn btn-sm btn-secondary">Сброс</a>
+            </div>
+        </form>
+        <div class="text-muted small mt-2">
+            Период: {{ date_from|date:"d.m.Y" }} — {{ date_to|date:"d.m.Y" }}. Дельты KPI — относительно предыдущего такого же интервала.
+        </div>
+    </div>
+</div>
+
+{% if include_crm %}
+<div class="mb-2"><h3 class="mb-0">Обращения</h3></div>
+<div class="row row-cards mb-3">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Входящие всего</div>
+                <div class="h1 mb-0">{{ crm_kpi.incoming }}</div>
+                <div class="text-muted small">
+                    {% if crm_kpi.incoming_delta > 0 %}+{% endif %}{{ crm_kpi.incoming_delta }}% к прошлому периоду
+                </div>
+                <div class="text-muted small">заявки {{ crm_kpi.apps_count }} · КП {{ crm_kpi.corps_count }} · звонки {{ crm_kpi.calls_count }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Бэклог «новых»</div>
+                <div class="h1 mb-0">{{ crm_kpi.backlog_new }}</div>
+                <div class="text-muted small">сейчас, все типы обращений</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Конверсия заявок</div>
+                <div class="h1 mb-0">{{ crm_kpi.conversion_pct }}%</div>
+                <div class="text-muted small">подтверждена + завершена</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">КП в работе+</div>
+                <div class="h1 mb-0">{{ crm_kpi.quote_pct }}%</div>
+                <div class="text-muted small">КП отправлено + закрыт</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Ср. время закрытия заявки</div>
+                <div class="h1 mb-0">{% if crm_kpi.avg_close_hours != None %}{{ crm_kpi.avg_close_hours }} ч{% else %}—{% endif %}</div>
+                <div class="text-muted small">completed / rejected</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards mb-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Входящие по дням</h3></div>
+            <div class="card-body">
+                <canvas id="chart-incoming-daily" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Статусы заявок</h3></div>
+            <div class="card-body">
+                <canvas id="chart-app-statuses" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Топ программ по заявкам</h3></div>
+            <div class="card-body">
+                <canvas id="chart-top-programs" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Статусы корпоративных запросов</h3></div>
+            <div class="card-body">
+                <canvas id="chart-corp-statuses" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Заявки по направлениям</h3></div>
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table">
+                    <thead>
+                        <tr>
+                            <th>Направление</th>
+                            <th class="w-1">Заявок</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in directions_table %}
+                        <tr>
+                            <td>{{ row.program__direction__name|default:"—" }}</td>
+                            <td>{{ row.c }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-muted">Нет данных за период</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if include_catalog %}
+<div class="mb-2"><h3 class="mb-0">Каталог</h3></div>
+<div class="row row-cards mb-3">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Активные программы</div>
+                <div class="h1 mb-0">{{ catalog_kpi.active_programs }}</div>
+                <div class="text-muted small">черновики: {{ catalog_kpi.draft_programs }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Открытые наборы</div>
+                <div class="h1 mb-0">{{ catalog_kpi.open_batches }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Новые программы</div>
+                <div class="h1 mb-0">{{ catalog_kpi.new_programs }}</div>
+                <div class="text-muted small">созданы за период</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Топ программа</div>
+                <div class="h3 mb-0 text-truncate" title="{{ catalog_kpi.top_program_name }}">{{ catalog_kpi.top_program_name }}</div>
+                <div class="text-muted small">{{ catalog_kpi.top_program_apps }} заявок</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Статусы программ</h3></div>
+            <div class="card-body">
+                <canvas id="chart-program-statuses" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if include_content %}
+<div class="mb-2"><h3 class="mb-0">Контент</h3></div>
+<div class="row row-cards mb-3">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Опубликовано</div>
+                <div class="h1 mb-0">{{ content_kpi.published_total }}</div>
+                <div class="text-muted small">новости {{ content_kpi.publications_published }} · кейсы {{ content_kpi.cases_published }} · отзывы {{ content_kpi.testimonials_published }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Очередь редактора</div>
+                <div class="h1 mb-0">{{ content_kpi.editor_queue }}</div>
+                <div class="text-muted small">черновик + модерация</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="font-weight-medium">Создано за период</div>
+                <div class="h1 mb-0">{{ content_kpi.created_in_period }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Контент: опубликовано vs черновик</h3></div>
+            <div class="card-body">
+                <canvas id="chart-content-by-type" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    var data = {{ chart_data_json|safe }};
+    var colors = ['#206bc4', '#2fb344', '#4299e1', '#f76707', '#ae3ec9', '#d63939', '#1098ad'];
+
+    function doughnut(id, chartData) {
+        var el = document.getElementById(id);
+        if (!el || !chartData) return;
+        new Chart(el, {
+            type: 'doughnut',
+            data: {
+                labels: chartData.labels,
+                datasets: [{ data: chartData.values, backgroundColor: colors }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    function bar(id, chartData, horizontal) {
+        var el = document.getElementById(id);
+        if (!el || !chartData) return;
+        new Chart(el, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Количество',
+                    data: chartData.values,
+                    backgroundColor: '#206bc4'
+                }]
+            },
+            options: {
+                indexAxis: horizontal ? 'y' : 'x',
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true }, y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    {% if include_crm %}
+    if (data.incoming_daily) {
+        var el = document.getElementById('chart-incoming-daily');
+        if (el) {
+            new Chart(el, {
+                type: 'line',
+                data: {
+                    labels: data.incoming_daily.labels,
+                    datasets: [
+                        { label: 'Заявки', data: data.incoming_daily.applications, borderColor: '#206bc4', backgroundColor: 'rgba(32,107,196,0.25)', fill: true, tension: 0.25 },
+                        { label: 'КП', data: data.incoming_daily.corporate, borderColor: '#ae3ec9', backgroundColor: 'rgba(174,62,201,0.25)', fill: true, tension: 0.25 },
+                        { label: 'Звонки', data: data.incoming_daily.callbacks, borderColor: '#2fb344', backgroundColor: 'rgba(47,179,68,0.25)', fill: true, tension: 0.25 }
+                    ]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true, stacked: false }, x: { stacked: false } }
+                }
+            });
+        }
+    }
+    doughnut('chart-app-statuses', data.application_statuses);
+    bar('chart-top-programs', data.top_programs, true);
+    bar('chart-corp-statuses', data.corporate_statuses, false);
+    {% endif %}
+
+    {% if include_catalog %}
+    doughnut('chart-program-statuses', data.program_statuses);
+    {% endif %}
+
+    {% if include_content %}
+    if (data.content_by_type) {
+        var cel = document.getElementById('chart-content-by-type');
+        if (cel) {
+            new Chart(cel, {
+                type: 'bar',
+                data: {
+                    labels: data.content_by_type.labels,
+                    datasets: [
+                        { label: 'Опубликовано', data: data.content_by_type.published, backgroundColor: '#2fb344' },
+                        { label: 'Черновик', data: data.content_by_type.draft, backgroundColor: '#adb5bd' }
+                    ]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    }
+    {% endif %}
+})();
+</script>
+{% endblock %}

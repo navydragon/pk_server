@@ -6,22 +6,17 @@
 
 {% block content %}
 <div class="row row-cards">
+    {% if can_access_catalog %}
     <div class="col-sm-6 col-lg-3">
         <div class="card card-sm">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-primary text-white avatar">
-                            <i class="ti ti-category"></i>
-                        </span>
+                        <span class="bg-primary text-white avatar"><i class="ti ti-category"></i></span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">
-                            Направления
-                        </div>
-                        <div class="text-muted">
-                            {{ directions_count }}
-                        </div>
+                        <div class="font-weight-medium">Направления</div>
+                        <div class="text-muted">{{ directions_count }}</div>
                     </div>
                 </div>
             </div>
@@ -32,17 +27,11 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-success text-white avatar">
-                            <i class="ti ti-school"></i>
-                        </span>
+                        <span class="bg-success text-white avatar"><i class="ti ti-school"></i></span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">
-                            Формы обучения
-                        </div>
-                        <div class="text-muted">
-                            {{ learning_formats_count }}
-                        </div>
+                        <div class="font-weight-medium">Формы обучения</div>
+                        <div class="text-muted">{{ learning_formats_count }}</div>
                     </div>
                 </div>
             </div>
@@ -53,17 +42,11 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-info text-white avatar">
-                            <i class="ti ti-book"></i>
-                        </span>
+                        <span class="bg-info text-white avatar"><i class="ti ti-book"></i></span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">
-                            Программы
-                        </div>
-                        <div class="text-muted">
-                            {{ programs_count }}
-                        </div>
+                        <div class="font-weight-medium">Программы</div>
+                        <div class="text-muted">{{ programs_count }}</div>
                     </div>
                 </div>
             </div>
@@ -74,17 +57,29 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-warning text-white avatar">
-                            <i class="ti ti-calendar"></i>
-                        </span>
+                        <span class="bg-warning text-white avatar"><i class="ti ti-calendar"></i></span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">
-                            Потоки/Наборы
-                        </div>
-                        <div class="text-muted">
-                            {{ course_batches_count }}
-                        </div>
+                        <div class="font-weight-medium">Потоки/Наборы</div>
+                        <div class="text-muted">{{ course_batches_count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if can_access_crm %}
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-cyan text-white avatar"><i class="ti ti-file-text"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">Заявки</div>
+                        <div class="text-muted">{{ applications_count }} (новых: {{ applications_new_count }})</div>
                     </div>
                 </div>
             </div>
@@ -95,17 +90,11 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-cyan text-white avatar">
-                            <i class="ti ti-file-text"></i>
-                        </span>
+                        <span class="bg-purple text-white avatar"><i class="ti ti-building"></i></span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">
-                            Заявки
-                        </div>
-                        <div class="text-muted">
-                            {{ applications_count }}
-                        </div>
+                        <div class="font-weight-medium">Корп. запросы</div>
+                        <div class="text-muted">{{ corporate_requests_count }} (новых: {{ corporate_requests_new_count }})</div>
                     </div>
                 </div>
             </div>
@@ -116,17 +105,29 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-teal text-white avatar">
-                            <i class="ti ti-phone-call"></i>
-                        </span>
+                        <span class="bg-teal text-white avatar"><i class="ti ti-phone-call"></i></span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">
-                            Обратные звонки
-                        </div>
-                        <div class="text-muted">
-                            {{ callback_requests_count }}
-                        </div>
+                        <div class="font-weight-medium">Обратные звонки</div>
+                        <div class="text-muted">{{ callback_requests_count }} (новых: {{ callback_requests_new_count }})</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if can_access_content %}
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-indigo text-white avatar"><i class="ti ti-news"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">Публикации</div>
+                        <div class="text-muted">{{ publications_count }}</div>
                     </div>
                 </div>
             </div>
@@ -137,17 +138,11 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-indigo text-white avatar">
-                            <i class="ti ti-news"></i>
-                        </span>
+                        <span class="bg-orange text-white avatar"><i class="ti ti-briefcase"></i></span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">
-                            Публикации
-                        </div>
-                        <div class="text-muted">
-                            {{ publications_count }}
-                        </div>
+                        <div class="font-weight-medium">Кейсы</div>
+                        <div class="text-muted">{{ cases_count }}</div>
                     </div>
                 </div>
             </div>
@@ -158,43 +153,17 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="bg-orange text-white avatar">
-                            <i class="ti ti-briefcase"></i>
-                        </span>
+                        <span class="bg-pink text-white avatar"><i class="ti ti-quote"></i></span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">
-                            Кейсы
-                        </div>
-                        <div class="text-muted">
-                            {{ cases_count }}
-                        </div>
+                        <div class="font-weight-medium">Отзывы</div>
+                        <div class="text-muted">{{ testimonials_count }}</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <span class="bg-pink text-white avatar">
-                            <i class="ti ti-quote"></i>
-                        </span>
-                    </div>
-                    <div class="col">
-                        <div class="font-weight-medium">
-                            Отзывы
-                        </div>
-                        <div class="text-muted">
-                            {{ testimonials_count }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% endif %}
 </div>
 
 <div class="row mt-4">
@@ -205,6 +174,12 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:analytics' %}" class="btn btn-dark w-100 mb-2">
+                            <i class="ti ti-chart-bar"></i> Аналитика
+                        </a>
+                    </div>
+                    {% if can_access_catalog %}
                     <div class="col-md-3">
                         <a href="{% url 'admin_panel:direction_list' %}" class="btn btn-primary w-100 mb-2">
                             <i class="ti ti-category"></i> Управление направлениями
@@ -225,9 +200,16 @@
                             <i class="ti ti-calendar"></i> Управление потоками
                         </a>
                     </div>
+                    {% endif %}
+                    {% if can_access_crm %}
                     <div class="col-md-3">
                         <a href="{% url 'admin_panel:application_list' %}" class="btn btn-cyan w-100 mb-2">
-                            <i class="ti ti-file-text"></i> Управление заявками
+                            <i class="ti ti-file-text"></i> Заявки слушателей
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'admin_panel:corporaterequest_list' %}" class="btn btn-purple w-100 mb-2">
+                            <i class="ti ti-building"></i> Корпоративные запросы
                         </a>
                     </div>
                     <div class="col-md-3">
@@ -235,6 +217,8 @@
                             <i class="ti ti-phone-call"></i> Обратные звонки
                         </a>
                     </div>
+                    {% endif %}
+                    {% if can_access_content %}
                     <div class="col-md-3">
                         <a href="{% url 'admin_panel:publication_list' %}" class="btn btn-indigo w-100 mb-2">
                             <i class="ti ti-news"></i> Публикации
@@ -250,6 +234,7 @@
                             <i class="ti ti-quote"></i> Отзывы
                         </a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

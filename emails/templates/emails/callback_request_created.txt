@@ -3,4 +3,6 @@
 Имя: {{ name }}
 Телефон: {{ phone }}
 Email: {{ email }}
+Тип обращения: {{ request_type }}
+Комментарий: {{ comment }}
 Дата подачи: {{ created_at }}

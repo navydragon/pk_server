@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
@@ -8,7 +9,7 @@ from rest_framework.test import APITestCase
 from unittest.mock import patch
 
 from core.choices import CourseBatchStatus, LearningFormatStatus, ProgramStatus, ProgramType
-from core.models import Application, CallbackRequest, CourseBatch, Direction, LearningFormat, Program
+from core.models import Application, CallbackRequest, CorporateRequest, CourseBatch, Direction, LearningFormat, Program
 
 
 class ActiveProgramsApiTests(APITestCase):
@@ -231,7 +232,8 @@ class ProgramsWithBatchesApiTests(APITestCase):
             if program['batches']:
                 batch = program['batches'][0]
                 expected_batch_fields = [
-                    'id', 'start_date', 'end_date', 'learning_format', 'cost', 'status',
+                    'id', 'name', 'start_date', 'end_date', 'learning_format',
+                    'schedule', 'seats_count', 'cost', 'status',
                     'enrollment_status_text', 'action_button_text', 'is_action_enabled'
                 ]
                 for field in expected_batch_fields:
@@ -383,6 +385,7 @@ class ApplicationCreateApiTests(APITestCase):
         self.assertIn('created_at', response.data)
 
     @patch('emails.services.send_mail')
+    @override_settings(NOTIFICATION_EMAIL='notify@example.com')
     def test_application_create_sends_email(self, mock_send_mail):
         """При создании заявки отправляется email-уведомление."""
         url = reverse('application-create')
@@ -426,14 +429,16 @@ class CallbackRequestCreateApiTests(APITestCase):
             'name': 'Петр Петров',
             'phone': '+7 999 000-00-00',
             'email': 'petr@example.com',
+            'comment': 'Вопрос по курсу',
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        expected_fields = ['id', 'name', 'phone', 'email', 'created_at']
+        expected_fields = ['id', 'name', 'phone', 'email', 'request_type', 'comment', 'created_at']
         for field in expected_fields:
             self.assertIn(field, response.data)
 
     @patch('emails.services.send_mail')
+    @override_settings(NOTIFICATION_EMAIL='notify@example.com')
     def test_callback_request_create_sends_email(self, mock_send_mail):
         """При создании запроса отправляется email-уведомление."""
         url = reverse('callback-request-create')
@@ -463,4 +468,47 @@ class CallbackRequestCreateApiTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(CallbackRequest.objects.count(), 0)
+
+    @patch('emails.services.send_mail')
+    def test_callback_request_email_optional(self, mock_send_mail):
+        """Email необязателен."""
+        url = reverse('callback-request-create')
+        data = {
+            'name': 'Без Email',
+            'phone': '+7 999 555-55-55',
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(CallbackRequest.objects.count(), 1)
+
+
+class CorporateRequestCreateApiTests(APITestCase):
+    """Тесты API создания корпоративного запроса."""
+
+    @patch('emails.services.send_mail')
+    @override_settings(NOTIFICATION_EMAIL='notify@example.com')
+    def test_corporate_request_create_returns_201(self, mock_send_mail):
+        url = reverse('corporate-request-create')
+        data = {
+            'organization_name': 'ООО Пример',
+            'contact_name': 'Анна Смирнова',
+            'phone': '+7 999 444-44-44',
+            'email': 'anna@example.com',
+            'topics': 'Бизнес-анализ',
+            'employees_count': 25,
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(CorporateRequest.objects.count(), 1)
+        req = CorporateRequest.objects.first()
+        self.assertEqual(req.organization_name, 'ООО Пример')
+        self.assertEqual(req.employees_count, 25)
+        self.assertEqual(req.status, 'new')
+        mock_send_mail.assert_called_once()
+
+    def test_corporate_request_validation_error(self):
+        url = reverse('corporate-request-create')
+        response = self.client.post(url, {'organization_name': 'X'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(CorporateRequest.objects.count(), 0)
 

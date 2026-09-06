@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Редактирование{% else %}Создание{% endif %} корпоративного запроса{% endblock %}
+
+{% block page_title %}{% if object %}Редактирование корпоративного запроса{% else %}Создание корпоративного запроса{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <h3 class="mb-3">Организация и контакт</h3>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label required">Организация</label>
+                    {{ form.organization_name }}
+                    {% if form.organization_name.errors %}<div class="text-danger">{{ form.organization_name.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label required">ФИО контактного лица</label>
+                    {{ form.contact_name }}
+                    {% if form.contact_name.errors %}<div class="text-danger">{{ form.contact_name.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Должность</label>
+                    {{ form.contact_position }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label required">Телефон</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<div class="text-danger">{{ form.phone.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label required">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div class="text-danger">{{ form.email.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <h3 class="mb-3">Запрос</h3>
+            <div class="mb-3">
+                <label class="form-label required">Интересующие направления/темы</label>
+                {{ form.topics }}
+                {% if form.topics.errors %}<div class="text-danger">{{ form.topics.errors }}</div>{% endif %}
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Направления</label>
+                    {{ form.directions }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Программы</label>
+                    {{ form.programs }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label required">Количество сотрудников</label>
+                    {{ form.employees_count }}
+                    {% if form.employees_count.errors %}<div class="text-danger">{{ form.employees_count.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Желаемые сроки</label>
+                    {{ form.desired_dates }}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Комментарии клиента</label>
+                {{ form.comment }}
+            </div>
+
+            <hr>
+            <h3 class="mb-3">Обработка</h3>
+            <p class="text-muted small">Рекомендуемый порядок: Новый → В работе → КП отправлено → Закрыт</p>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label required">Статус</label>
+                    {{ form.status }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ответственный</label>
+                    {{ form.assigned_to }}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Комментарий администратора</label>
+                {{ form.admin_comment }}
+            </div>
+            {% if object %}
+            <div class="mb-3 text-muted small">
+                Создано: {{ object.created_at|date:"d.m.Y H:i" }} · Обновлено: {{ object.updated_at|date:"d.m.Y H:i" }}
+            </div>
+            {% endif %}
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{% url 'admin_panel:corporaterequest_list' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

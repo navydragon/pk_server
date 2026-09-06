@@ -1,8 +1,23 @@
 from django import forms
+from django.contrib.auth import get_user_model
 
-from core.models import Application, CallbackRequest, CourseBatch, Direction, LearningFormat, Program
+from core.models import (
+    Application,
+    CallbackRequest,
+    CorporateRequest,
+    CourseBatch,
+    Direction,
+    LearningFormat,
+    Program,
+)
 from publications.models import Case, Publication, Testimonial
-from publications.models import Publication
+
+
+User = get_user_model()
+
+
+def _staff_user_queryset():
+    return User.objects.filter(is_active=True).order_by('username')
 
 
 class DirectionForm(forms.ModelForm):
@@ -83,7 +98,7 @@ class CourseBatchForm(forms.ModelForm):
         input_formats=['%Y-%m-%d'],
         required=False
     )
-    
+
     class Meta:
         model = CourseBatch
         fields = [
@@ -104,12 +119,12 @@ class CourseBatchForm(forms.ModelForm):
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
-        
+
         if start_date and end_date and end_date < start_date:
             raise forms.ValidationError({
                 'end_date': 'Дата окончания не может быть раньше даты начала.'
             })
-        
+
         return cleaned_data
 
 
@@ -119,7 +134,7 @@ class ApplicationForm(forms.ModelForm):
         model = Application
         fields = [
             'full_name', 'program', 'batch', 'email', 'phone',
-            'comment', 'status', 'admin_comment'
+            'preferred_contact', 'comment', 'status', 'assigned_to', 'admin_comment'
         ]
         widgets = {
             'full_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -127,13 +142,18 @@ class ApplicationForm(forms.ModelForm):
             'batch': forms.Select(attrs={'class': 'form-select'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'preferred_contact': forms.Select(attrs={'class': 'form-select'}),
             'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'status': forms.Select(attrs={'class': 'form-select'}),
+            'assigned_to': forms.Select(attrs={'class': 'form-select'}),
             'admin_comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['assigned_to'].queryset = _staff_user_queryset()
+        self.fields['assigned_to'].required = False
+        self.fields['preferred_contact'].required = False
         if 'program' in self.data:
             try:
                 program_id = int(self.data.get('program'))
@@ -162,16 +182,64 @@ class ApplicationForm(forms.ModelForm):
         return cleaned_data
 
 
+class CorporateRequestForm(forms.ModelForm):
+    """Форма для CorporateRequest."""
+    class Meta:
+        model = CorporateRequest
+        fields = [
+            'organization_name', 'contact_name', 'contact_position',
+            'phone', 'email', 'topics', 'directions', 'programs',
+            'employees_count', 'desired_dates', 'comment',
+            'status', 'assigned_to', 'admin_comment',
+        ]
+        widgets = {
+            'organization_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'contact_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'contact_position': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'topics': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'directions': forms.SelectMultiple(attrs={'class': 'form-select', 'size': 5}),
+            'programs': forms.SelectMultiple(attrs={'class': 'form-select', 'size': 5}),
+            'employees_count': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'desired_dates': forms.TextInput(attrs={'class': 'form-control'}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'assigned_to': forms.Select(attrs={'class': 'form-select'}),
+            'admin_comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['assigned_to'].queryset = _staff_user_queryset()
+        self.fields['assigned_to'].required = False
+
+
 class CallbackRequestForm(forms.ModelForm):
     """Форма для CallbackRequest (запрос обратного звонка)."""
     class Meta:
         model = CallbackRequest
-        fields = ['name', 'phone', 'email']
+        fields = [
+            'name', 'phone', 'email', 'request_type', 'comment',
+            'status', 'assigned_to', 'admin_comment',
+        ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'request_type': forms.Select(attrs={'class': 'form-select'}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'assigned_to': forms.Select(attrs={'class': 'form-select'}),
+            'admin_comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['assigned_to'].queryset = _staff_user_queryset()
+        self.fields['assigned_to'].required = False
+        self.fields['email'].required = False
+        self.fields['request_type'].required = False
 
 
 class PublicationForm(forms.ModelForm):
@@ -316,4 +384,3 @@ class TestimonialForm(forms.ModelForm):
             'is_featured': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'sort_order': forms.NumberInput(attrs={'class': 'form-control'}),
         }
-

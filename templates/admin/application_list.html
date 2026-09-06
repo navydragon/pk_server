@@ -11,6 +11,53 @@
 {% endblock %}
 
 {% block content %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label">Статус</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Программа</label>
+                <select name="program" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    {% for program in programs %}
+                    <option value="{{ program.id }}" {% if filters.program == program.id|stringformat:"s" %}selected{% endif %}>{{ program.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Ответственный</label>
+                <select name="assigned_to" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    <option value="none" {% if filters.assigned_to == 'none' %}selected{% endif %}>Не назначен</option>
+                    {% for user in assignees %}
+                    <option value="{{ user.id }}" {% if filters.assigned_to == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">С</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">По</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.date_to }}">
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-primary">Фильтр</button>
+                <a href="{% url 'admin_panel:application_list' %}" class="btn btn-sm btn-secondary">Сброс</a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">
         <div class="row align-items-center">
@@ -20,15 +67,12 @@
             <div class="col-auto">
                 <div class="d-flex align-items-center gap-2">
                     <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Поиск..." style="width: 200px;">
-                    <select id="status-filter" class="form-select form-select-sm" style="width: auto;">
-                        <option value="">Все статусы</option>
-                        <option value="Новая">Новая</option>
-                        <option value="В работе">В работе</option>
-                        <option value="Подтверждена">Подтверждена</option>
-                        <option value="Отклонена">Отклонена</option>
-                        <option value="Завершена">Завершена</option>
-                    </select>
-                    <a href="{% url 'admin_panel:application_create' %}" class="btn btn-sm btn-primary ms-2">
+                    {% if can_export_crm %}
+                    <a href="{% url 'admin_panel:application_export' %}?{{ request.GET.urlencode }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="ti ti-download"></i> CSV
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'admin_panel:application_create' %}" class="btn btn-sm btn-primary">
                         <i class="ti ti-plus"></i> Создать
                     </a>
                 </div>
@@ -46,6 +90,7 @@
                     <th>Телефон</th>
                     <th>Дата создания</th>
                     <th>Статус</th>
+                    <th>Ответственный</th>
                     <th class="w-1">Действия</th>
                 </tr>
             </thead>
@@ -59,30 +104,32 @@
                     <td>{{ application.phone }}</td>
                     <td>{{ application.created_at|date:"d.m.Y H:i" }}</td>
                     <td>
-                        {% if application.status == 'new' %}
-                        <span class="badge bg-secondary text-white">Новая</span>
-                        {% elif application.status == 'in_progress' %}
-                        <span class="badge bg-info text-white">В работе</span>
-                        {% elif application.status == 'confirmed' %}
-                        <span class="badge bg-success text-white">Подтверждена</span>
-                        {% elif application.status == 'rejected' %}
-                        <span class="badge bg-danger text-white">Отклонена</span>
-                        {% elif application.status == 'completed' %}
-                        <span class="badge bg-primary text-white">Завершена</span>
-                        {% else %}
-                        <span class="badge bg-secondary text-white">{{ application.get_status_display }}</span>
-                        {% endif %}
+                        <form method="post" action="{% url 'admin_panel:application_quick_status' application.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 140px;">
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if application.status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
                     </td>
+                    <td>{{ application.assigned_to|default:"—" }}</td>
                     <td>
                         <div class="btn-list flex-nowrap">
                             <a href="{% url 'admin_panel:application_edit' application.pk %}" class="btn btn-sm btn-primary">
                                 <i class="ti ti-edit"></i>
                             </a>
+                            {% if can_delete_crm %}
                             <a href="{% url 'admin_panel:application_delete' application.pk %}" class="btn btn-sm btn-danger">
                                 <i class="ti ti-trash"></i>
                             </a>
+                            {% endif %}
                         </div>
                     </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-muted">Заявки не найдены</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -102,17 +149,12 @@
             pageLength: 25,
             order: [[5, 'desc']],
             columnDefs: [
-                { orderable: false, targets: 7 }
+                { orderable: false, targets: [6, 8] }
             ]
         });
 
         $('#search-input').on('keyup', function() {
             table.search($(this).val()).draw();
-        });
-
-        $('#status-filter').on('change', function() {
-            var status = $(this).val();
-            table.column(6).search(status).draw();
         });
     });
 </script>

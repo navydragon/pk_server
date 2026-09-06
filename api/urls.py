@@ -6,6 +6,7 @@ from .views import (
     CallbackRequestCreateView,
     CaseDetailView,
     CaseListView,
+    CorporateRequestCreateView,
     ProgramDetailView,
     ProgramsWithBatchesView,
     PublicationDetailView,
@@ -21,6 +22,7 @@ urlpatterns = [
     path('programs/<int:program_id>/', ProgramDetailView.as_view(), name='program-detail'),
     path('applications/', ApplicationCreateView.as_view(), name='application-create'),
     path('callback-requests/', CallbackRequestCreateView.as_view(), name='callback-request-create'),
+    path('corporate-requests/', CorporateRequestCreateView.as_view(), name='corporate-request-create'),
     # Publications
     path('publications/', PublicationListView.as_view(), name='publication-list'),
     path('publications/featured/', PublicationFeaturedView.as_view(), name='publication-featured'),

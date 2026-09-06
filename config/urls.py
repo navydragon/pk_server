@@ -39,7 +39,11 @@ urlpatterns = [
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     # API эндпоинты
     path('api/', include('api.urls')),
+    path('api/advisor/', include('advisor.urls')),
 ]
 
 if settings.DEBUG:
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
+    urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

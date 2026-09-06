@@ -1,6 +1,19 @@
 {# Компактная навигация по разделам (в одну линию) #}
-{# Ожидает переменную active_section: directions|formats|programs|batches|applications|callback_requests|publications|cases|testimonials #}
+{# Ожидает переменную active_section #}
 <div class="d-flex flex-wrap gap-2 justify-content-end">
+  <a href="{% url 'admin_panel:analytics' %}"
+     class="card card-sm card-link {% if active_section == 'analytics' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 160px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-azure text-white">
+          <i class="ti ti-chart-bar"></i>
+        </span>
+        <div class="fw-semibold">Аналитика</div>
+      </div>
+    </div>
+  </a>
+  {% if can_access_catalog %}
   <a href="{% url 'admin_panel:direction_list' %}"
      class="card card-sm card-link {% if active_section == 'directions' %}border-primary bg-primary-lt{% endif %}"
      style="min-width: 170px;">
@@ -52,7 +65,9 @@
       </div>
     </div>
   </a>
+  {% endif %}
 
+  {% if can_access_crm %}
   <a href="{% url 'admin_panel:application_list' %}"
      class="card card-sm card-link {% if active_section == 'applications' %}border-primary bg-primary-lt{% endif %}"
      style="min-width: 160px;">
@@ -62,6 +77,19 @@
           <i class="ti ti-file-text"></i>
         </span>
         <div class="fw-semibold">Заявки</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_panel:corporaterequest_list' %}"
+     class="card card-sm card-link {% if active_section == 'corporate_requests' %}border-primary bg-primary-lt{% endif %}"
+     style="min-width: 200px;">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm bg-purple text-white">
+          <i class="ti ti-building"></i>
+        </span>
+        <div class="fw-semibold">Корп. запросы</div>
       </div>
     </div>
   </a>
@@ -78,7 +106,9 @@
       </div>
     </div>
   </a>
+  {% endif %}
 
+  {% if can_access_content %}
   <a href="{% url 'admin_panel:publication_list' %}"
      class="card card-sm card-link {% if active_section == 'publications' %}border-primary bg-primary-lt{% endif %}"
      style="min-width: 160px;">
@@ -117,5 +147,5 @@
       </div>
     </div>
   </a>
+  {% endif %}
 </div>
-

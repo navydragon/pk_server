@@ -7,28 +7,29 @@ urlpatterns = [
     # Авторизация
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
-    
+
     # Dashboard
     path('', views.dashboard_view, name='dashboard'),
-    
+    path('analytics/', views.analytics_view, name='analytics'),
+
     # Direction URLs
     path('directions/', views.DirectionListView.as_view(), name='direction_list'),
     path('directions/create/', views.DirectionCreateView.as_view(), name='direction_create'),
     path('directions/<int:pk>/edit/', views.DirectionUpdateView.as_view(), name='direction_edit'),
     path('directions/<int:pk>/delete/', views.DirectionDeleteView.as_view(), name='direction_delete'),
-    
+
     # LearningFormat URLs
     path('learning-formats/', views.LearningFormatListView.as_view(), name='learningformat_list'),
     path('learning-formats/create/', views.LearningFormatCreateView.as_view(), name='learningformat_create'),
     path('learning-formats/<int:pk>/edit/', views.LearningFormatUpdateView.as_view(), name='learningformat_edit'),
     path('learning-formats/<int:pk>/delete/', views.LearningFormatDeleteView.as_view(), name='learningformat_delete'),
-    
+
     # Program URLs
     path('programs/', views.ProgramListView.as_view(), name='program_list'),
     path('programs/create/', views.ProgramCreateView.as_view(), name='program_create'),
     path('programs/<int:pk>/edit/', views.ProgramUpdateView.as_view(), name='program_edit'),
     path('programs/<int:pk>/delete/', views.ProgramDeleteView.as_view(), name='program_delete'),
-    
+
     # CourseBatch URLs
     path('course-batches/', views.CourseBatchListView.as_view(), name='coursebatch_list'),
     path('course-batches/create/', views.CourseBatchCreateView.as_view(), name='coursebatch_create'),
@@ -38,16 +39,56 @@ urlpatterns = [
     # Application URLs
     path('applications/', views.ApplicationListView.as_view(), name='application_list'),
     path('applications/create/', views.ApplicationCreateView.as_view(), name='application_create'),
+    path('applications/export/', views.ApplicationExportView.as_view(), name='application_export'),
     path('applications/<int:pk>/edit/', views.ApplicationUpdateView.as_view(), name='application_edit'),
     path('applications/<int:pk>/delete/', views.ApplicationDeleteView.as_view(), name='application_delete'),
+    path(
+        'applications/<int:pk>/quick-status/',
+        views.ApplicationQuickStatusView.as_view(),
+        name='application_quick_status',
+    ),
+
+    # CorporateRequest URLs
+    path('corporate-requests/', views.CorporateRequestListView.as_view(), name='corporaterequest_list'),
+    path('corporate-requests/create/', views.CorporateRequestCreateView.as_view(), name='corporaterequest_create'),
+    path('corporate-requests/export/', views.CorporateRequestExportView.as_view(), name='corporaterequest_export'),
+    path(
+        'corporate-requests/<int:pk>/edit/',
+        views.CorporateRequestUpdateView.as_view(),
+        name='corporaterequest_edit',
+    ),
+    path(
+        'corporate-requests/<int:pk>/delete/',
+        views.CorporateRequestDeleteView.as_view(),
+        name='corporaterequest_delete',
+    ),
+    path(
+        'corporate-requests/<int:pk>/quick-status/',
+        views.CorporateRequestQuickStatusView.as_view(),
+        name='corporaterequest_quick_status',
+    ),
 
     # CallbackRequest URLs
     path('callback-requests/', views.CallbackRequestListView.as_view(), name='callbackrequest_list'),
     path('callback-requests/create/', views.CallbackRequestCreateView.as_view(), name='callbackrequest_create'),
-    path('callback-requests/<int:pk>/edit/', views.CallbackRequestUpdateView.as_view(), name='callbackrequest_edit'),
-    path('callback-requests/<int:pk>/delete/', views.CallbackRequestDeleteView.as_view(), name='callbackrequest_delete'),
+    path('callback-requests/export/', views.CallbackRequestExportView.as_view(), name='callbackrequest_export'),
+    path(
+        'callback-requests/<int:pk>/edit/',
+        views.CallbackRequestUpdateView.as_view(),
+        name='callbackrequest_edit',
+    ),
+    path(
+        'callback-requests/<int:pk>/delete/',
+        views.CallbackRequestDeleteView.as_view(),
+        name='callbackrequest_delete',
+    ),
+    path(
+        'callback-requests/<int:pk>/quick-status/',
+        views.CallbackRequestQuickStatusView.as_view(),
+        name='callbackrequest_quick_status',
+    ),
 
-    # Publication URLs (новости и статьи)
+    # Publication URLs
     path('publications/', views.PublicationListView.as_view(), name='publication_list'),
     path('publications/create/', views.PublicationCreateView.as_view(), name='publication_create'),
     path('publications/<int:pk>/edit/', views.PublicationUpdateView.as_view(), name='publication_edit'),

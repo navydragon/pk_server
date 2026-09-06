@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if object %}Редактирование{% else %}Создание{% endif %} запроса обратного звонка{% endblock %}
+{% block title %}{% if object %}Редактирование{% else %}Создание{% endif %} запроса звонка{% endblock %}
 
-{% block page_title %}{% if object %}Редактирование запроса{% else %}Создание запроса{% endif %} обратного звонка{% endblock %}
+{% block page_title %}{% if object %}Редактирование запроса звонка{% else %}Создание запроса звонка{% endif %}{% endblock %}
 
 {% block content %}
 <div class="card">
@@ -10,37 +10,61 @@
         <form method="post">
             {% csrf_token %}
             {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                {{ form.non_field_errors }}
-            </div>
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
             {% endif %}
+
+            <h3 class="mb-3">Контакт</h3>
             <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label required">Имя</label>
-                        {{ form.name }}
-                        {% if form.name.errors %}
-                        <div class="text-danger">{{ form.name.errors }}</div>
-                        {% endif %}
-                    </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label required">Имя</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="text-danger">{{ form.name.errors }}</div>{% endif %}
                 </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label required">Телефон</label>
-                        {{ form.phone }}
-                        {% if form.phone.errors %}
-                        <div class="text-danger">{{ form.phone.errors }}</div>
-                        {% endif %}
-                    </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label required">Телефон</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<div class="text-danger">{{ form.phone.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div class="text-danger">{{ form.email.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Тип обращения</label>
+                    {{ form.request_type }}
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label required">Email</label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                <div class="text-danger">{{ form.email.errors }}</div>
-                {% endif %}
+                <label class="form-label">Комментарий/вопрос</label>
+                {{ form.comment }}
             </div>
+
+            <hr>
+            <h3 class="mb-3">Обработка</h3>
+            <p class="text-muted small">Рекомендуемый порядок: Новый → Обработан → Закрыт</p>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label required">Статус</label>
+                    {{ form.status }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ответственный</label>
+                    {{ form.assigned_to }}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Комментарий администратора</label>
+                {{ form.admin_comment }}
+            </div>
+            {% if object %}
+            <div class="mb-3 text-muted small">
+                Создано: {{ object.created_at|date:"d.m.Y H:i" }} · Обновлено: {{ object.updated_at|date:"d.m.Y H:i" }}
+            </div>
+            {% endif %}
+
             <div class="form-footer">
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <a href="{% url 'admin_panel:callbackrequest_list' %}" class="btn btn-secondary">Отмена</a>

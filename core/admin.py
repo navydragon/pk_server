@@ -8,8 +8,18 @@ from .models import (
     Direction,
     LearningFormat,
     Program,
+    Setting,
     StaffProfile,
 )
+
+
+@admin.register(Setting)
+class SettingAdmin(admin.ModelAdmin):
+    """Админка для настроек (code/value)."""
+    list_display = ('code', 'value', 'updated_at')
+    search_fields = ('code', 'value')
+    ordering = ('code',)
+    readonly_fields = ('updated_at',)
 
 
 @admin.register(Direction)

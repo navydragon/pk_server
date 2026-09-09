@@ -81,9 +81,15 @@ def can_export_crm(user):
     return can_access_crm(user)
 
 
+def can_access_settings(user):
+    return is_administrator(user)
+
+
 def can_access_section(user, section):
     if section == 'analytics':
         return can_access_admin_panel(user)
+    if section == 'settings':
+        return can_access_settings(user)
     if section in CONTENT_SECTIONS:
         return can_access_content(user)
     if section in CATALOG_SECTIONS:
@@ -142,6 +148,13 @@ class ContentAccessMixin(StaffRequiredMixin):
 
     def has_section_access(self, user):
         return can_access_content(user)
+
+
+class SettingsAccessMixin(StaffRequiredMixin):
+    """Доступ к настройкам: только администратор."""
+
+    def has_section_access(self, user):
+        return can_access_settings(user)
 
 
 class CRMDeleteMixin(CRMAccessMixin):

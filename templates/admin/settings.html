@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Настройки{% endblock %}
+
+{% block page_title %}Настройки{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+    {% include 'admin/_section_nav_cards.html' with active_section='settings' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Публичный сайт</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-check form-switch">
+                    {{ form.show_test_data }}
+                    <span class="form-check-label">{{ form.show_test_data.label }}</span>
+                </label>
+                {% if form.show_test_data.help_text %}
+                <div class="form-hint">{{ form.show_test_data.help_text }}</div>
+                {% endif %}
+                {% if form.show_test_data.errors %}
+                <div class="text-danger small">{{ form.show_test_data.errors }}</div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

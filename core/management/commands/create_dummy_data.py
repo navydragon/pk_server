@@ -355,25 +355,18 @@ class Command(BaseCommand):
     def _clear_demo_data(self):
         self.stdout.write(self.style.WARNING('Очистка демо-данных...'))
 
-        Application.objects.filter(email__endswith='@demo.local').delete()
-        CallbackRequest.objects.filter(email__endswith='@demo.local').delete()
-        CallbackRequest.objects.filter(phone__startswith='+79001').delete()
-        CorporateRequest.objects.filter(email__endswith='@demo.local').delete()
-
-        program_names = [item['name'] for item in PROGRAMS]
-        CourseBatch.objects.filter(name__startswith='Демо-поток').delete()
-        Program.objects.filter(name__in=program_names).delete()
-
-        direction_names = [item[0] for item in DIRECTIONS]
-        format_names = [item[0] for item in FORMATS]
-        Direction.objects.filter(name__in=direction_names).delete()
-        LearningFormat.objects.filter(name__in=format_names).delete()
-
-        Publication.objects.filter(slug__startswith='demo-').delete()
-        Case.objects.filter(slug__startswith='demo-').delete()
-        Testimonial.objects.filter(slug__startswith='demo-').delete()
-        Category.objects.filter(slug__in=[item[1] for item in CONTENT_CATEGORIES]).delete()
-        Tag.objects.filter(slug__in=[item[1] for item in CONTENT_TAGS]).delete()
+        Application.objects.filter(is_test=True).delete()
+        CallbackRequest.objects.filter(is_test=True).delete()
+        CorporateRequest.objects.filter(is_test=True).delete()
+        CourseBatch.objects.filter(is_test=True).delete()
+        Program.objects.filter(is_test=True).delete()
+        Direction.objects.filter(is_test=True).delete()
+        LearningFormat.objects.filter(is_test=True).delete()
+        Publication.objects.filter(is_test=True).delete()
+        Case.objects.filter(is_test=True).delete()
+        Testimonial.objects.filter(is_test=True).delete()
+        Category.objects.filter(is_test=True).delete()
+        Tag.objects.filter(is_test=True).delete()
 
         self.stdout.write(self.style.SUCCESS('Демо-данные удалены.'))
 
@@ -418,6 +411,7 @@ class Command(BaseCommand):
                     'short_description': short_description,
                     'sort_order': sort_order,
                     'status': status,
+                    'is_test': True,
                 },
             )
             result[name] = direction
@@ -435,6 +429,7 @@ class Command(BaseCommand):
                     'full_description': full_description,
                     'sort_order': sort_order,
                     'status': status,
+                    'is_test': True,
                 },
             )
             result[name] = learning_format
@@ -490,6 +485,7 @@ class Command(BaseCommand):
                     'learning_outcomes': 'Применение полученных компетенций в работе.',
                     'status': item['status'],
                     'position': item['position'],
+                    'is_test': True,
                 },
             )
             result[item['key']] = program
@@ -537,6 +533,7 @@ class Command(BaseCommand):
                         'seats_count': seats,
                         'cost': cost_value,
                         'status': status,
+                        'is_test': True,
                     },
                 )
                 result.append(batch)
@@ -590,6 +587,7 @@ class Command(BaseCommand):
                     'status': status,
                     'admin_comment': 'Взято в работу' if status != ApplicationStatus.NEW else '',
                     'assigned_to': assignees[(i - 1) % len(assignees)],
+                    'is_test': True,
                 },
             )
             Application.objects.filter(pk=application.pk).update(
@@ -640,6 +638,7 @@ class Command(BaseCommand):
                     'status': status,
                     'admin_comment': 'КП в работе' if status != CorporateRequestStatus.NEW else '',
                     'assigned_to': assignees[(i - 1) % len(assignees)],
+                    'is_test': True,
                 },
             )
             d_start = (i - 1) % len(direction_list)
@@ -702,6 +701,7 @@ class Command(BaseCommand):
                     'status': status,
                     'admin_comment': 'Перезвонили' if status != CallbackRequestStatus.NEW else '',
                     'assigned_to': assignees[(i - 1) % len(assignees)],
+                    'is_test': True,
                 },
             )
             CallbackRequest.objects.filter(pk=request_obj.pk).update(
@@ -724,6 +724,7 @@ class Command(BaseCommand):
                     'description': f'Демо-категория: {name}',
                     'sort_order': sort_order,
                     'category_type': category_type,
+                    'is_test': True,
                 },
             )
             categories[slug] = category
@@ -734,7 +735,7 @@ class Command(BaseCommand):
         for name, slug in CONTENT_TAGS:
             tag, created = Tag.objects.update_or_create(
                 slug=slug,
-                defaults={'name': name},
+                defaults={'name': name, 'is_test': True},
             )
             tags[slug] = tag
             mark = 'создан' if created else 'обновлён'
@@ -832,6 +833,7 @@ class Command(BaseCommand):
                     'updated_by': editor,
                     'meta_title': item['title'][:255],
                     'meta_description': f'SEO описание для {item["title"]}',
+                    'is_test': True,
                 },
             )
             publication.categories.set([categories[item['category']]])
@@ -894,6 +896,7 @@ class Command(BaseCommand):
                     'updated_by': editor,
                     'meta_title': item['title'][:255],
                     'meta_description': f'Кейс {item["company"]}',
+                    'is_test': True,
                 },
             )
             case.categories.set([categories['korporativnoe-obuchenie']])
@@ -970,6 +973,7 @@ class Command(BaseCommand):
                     'sort_order': sort_order,
                     'created_by': editor,
                     'updated_by': editor,
+                    'is_test': True,
                 },
             )
             result.append(testimonial)

@@ -11,6 +11,7 @@ urlpatterns = [
     # Dashboard
     path('', views.dashboard_view, name='dashboard'),
     path('analytics/', views.analytics_view, name='analytics'),
+    path('settings/', views.SettingsView.as_view(), name='settings'),
 
     # Direction URLs
     path('directions/', views.DirectionListView.as_view(), name='direction_list'),

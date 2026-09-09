@@ -21,6 +21,7 @@ from core.models import (
     LearningFormat,
     Program,
 )
+from core.settings_service import SHOW_TEST_DATA, get_bool_setting, set_setting
 from publications.models import Case, Publication, Testimonial
 
 from .analytics import build_analytics
@@ -35,6 +36,7 @@ from .forms import (
     LearningFormatForm,
     ProgramForm,
     PublicationForm,
+    SettingsForm,
     TestimonialForm,
 )
 from .permissions import (
@@ -42,6 +44,7 @@ from .permissions import (
     CRMDeleteMixin,
     CatalogAccessMixin,
     ContentAccessMixin,
+    SettingsAccessMixin,
     can_access_catalog,
     can_access_content,
     can_access_crm,
@@ -125,6 +128,27 @@ def analytics_view(request):
         ensure_ascii=False,
     )
     return render(request, 'admin/analytics.html', context)
+
+
+class SettingsView(SettingsAccessMixin, View):
+    """Системные настройки (только администратор)."""
+
+    template_name = 'admin/settings.html'
+
+    def get(self, request):
+        form = SettingsForm(
+            initial={'show_test_data': get_bool_setting(SHOW_TEST_DATA, default=False)}
+        )
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = SettingsForm(request.POST)
+        if form.is_valid():
+            value = 'true' if form.cleaned_data['show_test_data'] else 'false'
+            set_setting(SHOW_TEST_DATA, value)
+            messages.success(request, 'Настройки сохранены.')
+            return redirect('admin_panel:settings')
+        return render(request, self.template_name, {'form': form})
 
 
 def _assignees_context():

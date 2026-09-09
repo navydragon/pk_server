@@ -18,6 +18,11 @@ class Category(models.Model):
         verbose_name='Тип категории',
         help_text='Для новостей/публикаций или общий',
     )
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
+    )
 
     class Meta:
         verbose_name = 'Категория'
@@ -33,6 +38,11 @@ class Tag(models.Model):
 
     name = models.CharField(max_length=255, verbose_name='Название')
     slug = models.SlugField(max_length=255, unique=True, verbose_name='Slug')
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
+    )
 
     class Meta:
         verbose_name = 'Тег'
@@ -83,6 +93,11 @@ class Publication(models.Model):
     )
     is_featured = models.BooleanField(default=False, verbose_name='На главной', db_index=True)
     sort_order = models.IntegerField(default=0, verbose_name='Порядок сортировки')
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
+    )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
@@ -180,6 +195,11 @@ class Case(models.Model):
     )
     is_featured = models.BooleanField(default=False, verbose_name='На главной', db_index=True)
     sort_order = models.IntegerField(default=0, verbose_name='Порядок сортировки')
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
+    )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
@@ -268,6 +288,11 @@ class Testimonial(models.Model):
     )
     is_featured = models.BooleanField(default=False, verbose_name='На главной', db_index=True)
     sort_order = models.IntegerField(default=0, verbose_name='Порядок сортировки')
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
+    )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')

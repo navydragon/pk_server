@@ -1,5 +1,4 @@
 import uuid
-import uuid
 from datetime import date
 
 from django.db.models import Prefetch
@@ -14,6 +13,7 @@ from rest_framework.views import APIView
 
 from core.choices import ProgramStatus
 from core.models import Application, CallbackRequest, CorporateRequest, CourseBatch, Program
+from core.query import exclude_test_data
 from publications.choices import PublicationStatus, PublicationType
 from publications.models import Case, Publication, Testimonial
 
@@ -54,7 +54,9 @@ class ActiveProgramsView(APIView):
         tags=['Программы'],
     )
     def get(self, request, *args, **kwargs):
-        programs = Program.objects.filter(status=ProgramStatus.ACTIVE).select_related('direction', 'learning_format').order_by('position', 'name')
+        programs = exclude_test_data(
+            Program.objects.filter(status=ProgramStatus.ACTIVE)
+        ).select_related('direction', 'learning_format').order_by('position', 'name')
         serializer = ProgramSerializer(programs, many=True)
         return Response(serializer.data)
 
@@ -84,14 +86,14 @@ class ProgramsWithBatchesView(APIView):
         # Создаем Prefetch для потоков с фильтрацией по дате и оптимизацией
         batches_prefetch = Prefetch(
             'batches',
-            queryset=CourseBatch.objects.filter(
-                start_date__gte=current_date
+            queryset=exclude_test_data(
+                CourseBatch.objects.filter(start_date__gte=current_date)
             ).select_related('learning_format').order_by('start_date')
         )
 
         # Получаем все активные программы с оптимизированными запросами
-        programs = Program.objects.filter(
-            status=ProgramStatus.ACTIVE
+        programs = exclude_test_data(
+            Program.objects.filter(status=ProgramStatus.ACTIVE)
         ).select_related(
             'direction'
         ).prefetch_related(
@@ -164,8 +166,8 @@ class ProgramDetailView(APIView):
         # Создаем Prefetch для потоков с фильтрацией по дате и оптимизацией
         batches_prefetch = Prefetch(
             'batches',
-            queryset=CourseBatch.objects.filter(
-                start_date__gte=current_date
+            queryset=exclude_test_data(
+                CourseBatch.objects.filter(start_date__gte=current_date)
             ).select_related('learning_format').order_by('start_date')
         )
 
@@ -173,11 +175,13 @@ class ProgramDetailView(APIView):
             # Получаем программу с оптимизированными запросами
             # Используем select_related для direction и learning_format (ForeignKey)
             # Используем prefetch_related для batches (обратная связь)
-            program = Program.objects.select_related(
-                'direction',
-                'learning_format'
-            ).prefetch_related(
-                batches_prefetch
+            program = exclude_test_data(
+                Program.objects.select_related(
+                    'direction',
+                    'learning_format'
+                ).prefetch_related(
+                    batches_prefetch
+                )
             ).get(id=program_id)
         except Program.DoesNotExist:
             raise Http404('Программа не найдена')
@@ -302,8 +306,8 @@ class CorporateRequestCreateView(APIView):
 
 def _get_publication_queryset():
     """Базовый queryset только для опубликованных новостей и статей."""
-    return Publication.objects.filter(
-        status=PublicationStatus.PUBLISHED
+    return exclude_test_data(
+        Publication.objects.filter(status=PublicationStatus.PUBLISHED)
     ).prefetch_related('categories', 'tags')
 
 
@@ -396,7 +400,9 @@ class CaseListView(APIView):
         tags=['Кейсы'],
     )
     def get(self, request):
-        qs = Case.objects.filter(status=PublicationStatus.PUBLISHED)
+        qs = exclude_test_data(
+            Case.objects.filter(status=PublicationStatus.PUBLISHED)
+        )
         if request.query_params.get('featured') == 'true':
             qs = qs.filter(is_featured=True)
         limit = int(request.query_params.get('limit', 50))
@@ -420,7 +426,9 @@ class CaseDetailView(APIView):
     )
     def get(self, request, slug):
         try:
-            case = Case.objects.filter(status=PublicationStatus.PUBLISHED).get(slug=slug)
+            case = exclude_test_data(
+                Case.objects.filter(status=PublicationStatus.PUBLISHED)
+            ).get(slug=slug)
         except Case.DoesNotExist:
             raise Http404('Кейс не найден')
         serializer = CaseDetailSerializer(case, context={'request': request})
@@ -445,7 +453,9 @@ class TestimonialListCreateView(APIView):
         tags=['Отзывы'],
     )
     def get(self, request):
-        qs = Testimonial.objects.filter(status=PublicationStatus.PUBLISHED)
+        qs = exclude_test_data(
+            Testimonial.objects.filter(status=PublicationStatus.PUBLISHED)
+        )
         if request.query_params.get('featured') == 'true':
             qs = qs.filter(is_featured=True)
         limit = int(request.query_params.get('limit', 50))
@@ -498,9 +508,11 @@ class TestimonialFeaturedView(APIView):
         tags=['Отзывы'],
     )
     def get(self, request):
-        qs = Testimonial.objects.filter(
-            status=PublicationStatus.PUBLISHED,
-            is_featured=True,
+        qs = exclude_test_data(
+            Testimonial.objects.filter(
+                status=PublicationStatus.PUBLISHED,
+                is_featured=True,
+            )
         )[:10]
         serializer = TestimonialListSerializer(qs, many=True, context={'request': request})
         return Response(serializer.data)

@@ -22,6 +22,7 @@ from core.models import (
     Program,
     StaffProfile,
 )
+from core.settings_service import SHOW_TEST_DATA, get_bool_setting, set_setting
 
 User = get_user_model()
 
@@ -577,3 +578,27 @@ class AnalyticsViewTests(TestCase):
         self.assertTrue(response.context['include_content'])
         self.assertNotContains(response, 'chart-incoming-daily')
         self.assertContains(response, 'Контент')
+
+
+class SettingsViewTests(TestCase):
+    """Тесты страницы системных настроек."""
+
+    def setUp(self):
+        self.client = Client()
+        self.admin = create_staff_user('settings_admin', role=StaffRole.ADMINISTRATOR)
+        self.methodist = create_staff_user('settings_methodist', role=StaffRole.METHODIST)
+
+    def test_methodist_cannot_access_settings(self):
+        self.client.login(username='settings_methodist', password='testpass123')
+        response = self.client.get(reverse('admin_panel:settings'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_can_toggle_show_test_data(self):
+        set_setting(SHOW_TEST_DATA, 'false')
+        self.client.login(username='settings_admin', password='testpass123')
+        response = self.client.post(
+            reverse('admin_panel:settings'),
+            {'show_test_data': 'on'},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(get_bool_setting(SHOW_TEST_DATA, default=False))

@@ -384,3 +384,14 @@ class TestimonialForm(forms.ModelForm):
             'is_featured': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'sort_order': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
+
+class SettingsForm(forms.Form):
+    """Форма системных настроек."""
+
+    show_test_data = forms.BooleanField(
+        required=False,
+        label='Показывать тестовые данные',
+        help_text='Если включено, публичный сайт отдаёт записи, созданные командой create_dummy_data.',
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+    )

@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from core.choices import CourseBatchStatus, LearningFormatStatus, ProgramStatus, ProgramType
 from core.models import Application, CallbackRequest, CorporateRequest, CourseBatch, Direction, LearningFormat, Program
+from core.settings_service import SHOW_TEST_DATA, set_setting
 
 
 class ActiveProgramsApiTests(APITestCase):
@@ -511,4 +512,69 @@ class CorporateRequestCreateApiTests(APITestCase):
         response = self.client.post(url, {'organization_name': 'X'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(CorporateRequest.objects.count(), 0)
+
+
+class ShowTestDataApiTests(APITestCase):
+    """Фильтрация is_test по настройке show_test_data."""
+
+    def setUp(self):
+        self.direction = Direction.objects.create(name='Направление API', status='active')
+        self.real_program = Program.objects.create(
+            name='Реальная программа',
+            direction=self.direction,
+            program_type=ProgramType.QUALIFICATION_UPGRADE,
+            lead='Лид',
+            about_description='Описание',
+            curriculum='План',
+            target_audience='Аудитория',
+            hours_volume=72,
+            duration='2 месяца',
+            cost='10000 руб',
+            status=ProgramStatus.ACTIVE,
+            is_test=False,
+        )
+        self.test_program = Program.objects.create(
+            name='Демо программа',
+            direction=self.direction,
+            program_type=ProgramType.QUALIFICATION_UPGRADE,
+            lead='Лид',
+            about_description='Описание',
+            curriculum='План',
+            target_audience='Аудитория',
+            hours_volume=72,
+            duration='2 месяца',
+            cost='10000 руб',
+            status=ProgramStatus.ACTIVE,
+            is_test=True,
+        )
+        set_setting(SHOW_TEST_DATA, 'false')
+
+    def test_hides_test_programs_by_default(self):
+        url = reverse('active-programs')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        names = [p['name'] for p in response.data]
+        self.assertIn(self.real_program.name, names)
+        self.assertNotIn(self.test_program.name, names)
+
+    def test_shows_test_programs_when_enabled(self):
+        set_setting(SHOW_TEST_DATA, 'true')
+        url = reverse('active-programs')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        names = [p['name'] for p in response.data]
+        self.assertIn(self.real_program.name, names)
+        self.assertIn(self.test_program.name, names)
+
+    def test_test_program_detail_hidden_when_disabled(self):
+        url = reverse('program-detail', kwargs={'program_id': self.test_program.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_test_program_detail_visible_when_enabled(self):
+        set_setting(SHOW_TEST_DATA, 'true')
+        url = reverse('program-detail', kwargs={'program_id': self.test_program.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], self.test_program.name)
 

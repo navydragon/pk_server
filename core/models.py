@@ -16,6 +16,26 @@ from .choices import (
 )
 
 
+class Setting(models.Model):
+    """Ключ-значение настроек приложения."""
+
+    code = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name='Код',
+    )
+    value = models.TextField(verbose_name='Значение')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    class Meta:
+        verbose_name = 'Настройка'
+        verbose_name_plural = 'Настройки'
+        ordering = ['code']
+
+    def __str__(self):
+        return f'{self.code}={self.value}'
+
+
 class Direction(models.Model):
     """Направление (категория программ)"""
     name = models.CharField(
@@ -36,6 +56,11 @@ class Direction(models.Model):
         choices=DirectionStatus.CHOICES,
         default=DirectionStatus.ACTIVE,
         verbose_name='Статус'
+    )
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -79,6 +104,11 @@ class LearningFormat(models.Model):
         choices=LearningFormatStatus.CHOICES,
         default=LearningFormatStatus.ACTIVE,
         verbose_name='Статус'
+    )
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -200,6 +230,11 @@ class Program(models.Model):
         verbose_name='Позиция',
         help_text='Порядок сортировки программы'
     )
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания',
@@ -268,6 +303,11 @@ class CourseBatch(models.Model):
         choices=CourseBatchStatus.CHOICES,
         default=CourseBatchStatus.ENROLLMENT_OPEN,
         verbose_name='Статус'
+    )
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -352,6 +392,11 @@ class Application(models.Model):
         related_name='assigned_applications',
         verbose_name='Ответственный'
     )
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
+    )
 
     class Meta:
         verbose_name = 'Заявка слушателя'
@@ -429,6 +474,11 @@ class CorporateRequest(models.Model):
         related_name='assigned_corporate_requests',
         verbose_name='Ответственный'
     )
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания'
@@ -482,6 +532,11 @@ class CallbackRequest(models.Model):
         blank=True,
         related_name='assigned_callback_requests',
         verbose_name='Ответственный'
+    )
+    is_test = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name='Тестовые данные',
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
